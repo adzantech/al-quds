@@ -1,0 +1,3577 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Waktu Sholat Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Playfair+Display:wght@700&display=swap');
+    
+    @font-face {
+      font-family: 'Heathergreen';
+      src: url('./font/Heathergreen.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: 'Gondens';
+      src: url('./font/Gondens.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: 'Headlines-Bold';
+      src: url('./font/Headlines-Bold.otf') format('opentype');
+      font-weight: bold;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: 'Anton-Regular';
+      src: url('./font/Anton-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a4d2e 0%, #2d5f3f 50%, #1a4d2e 100%);
+      color: #ffffff;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .main-container {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 5px double #f4c430; /* Double border effect with gold color */
+    }
+    
+    .ramadhan-image-wrapper {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      touch-action: none; /* Prevent scrolling on touch devices */
+    }
+    
+    #ramadhanImageWrapper1 {
+      top: 10px;
+      left: calc(25% - 150px);
+    }
+    
+    #ramadhanImageWrapper2 {
+      top: 10px;
+      left: calc(50% - 150px);
+    }
+    
+    #ramadhanImageWrapper3 {
+      top: 150px;
+      left: calc(25% - 150px);
+    }
+    
+    #ramadhanImageWrapper4 {
+      top: 150px;
+      left: calc(50% - 150px);
+    }
+    
+    .ramadhan-image-direct {
+      width: 300px; /* Default width - can be expanded */
+      height: 200px; /* Default height - can be expanded */
+      border-radius: 8px;
+      cursor: move; /* Indicates the image can be moved */
+      transform-origin: center;
+      position: relative;
+      object-fit: fill; /* Allow stretching/expanding */
+      min-width: 100px; /* Minimum expandable size */
+      min-height: 60px; /* Minimum expandable size */
+    }
+    
+    /* Resize handles */
+    .resize-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #f4c430;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      z-index: 1001;
+      cursor: nwse-resize;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    
+    .resize-handle.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .resize-handle-br {
+      bottom: -6px;
+      right: -6px;
+      cursor: nwse-resize;
+    }
+    
+    .resize-handle-bl {
+      bottom: -6px;
+      left: -6px;
+      cursor: nesw-resize;
+    }
+    
+    .resize-handle-tr {
+      top: -6px;
+      right: -6px;
+      cursor: nesw-resize;
+    }
+    
+    .resize-handle-tl {
+      top: -6px;
+      left: -6px;
+      cursor: nwse-resize;
+    }
+    
+
+    
+    .header-banner {
+      background: transparent;
+      padding: 8px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      position: relative;
+      border-bottom: 1px solid #f4c430;
+    }
+    
+    .settings-icon {
+      font-size: 2em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 100;
+      opacity: 0.1;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .settings-icon:hover {
+      transform: rotate(90deg);
+      opacity: 1;
+    }
+    
+    .fullscreen-icon {
+      font-size: 2em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 100;
+      opacity: 0.1;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+      margin-left: 15px;
+    }
+    
+    .fullscreen-icon:hover {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+    
+    .hide-controls {
+      opacity: 0 !important;
+      pointer-events: none;
+    }
+    
+    .date-section {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      text-align: center;
+    }
+    
+    .date-masehi {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: #f4c430;
+    }
+    
+    .date-hijri {
+      font-size: 1.3em;
+      color: #ffffff;
+      opacity: 0.9;
+    }
+    
+    .masjid-info {
+      text-align: left;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 15px;
+    }
+    
+    .masjid-logo {
+      font-size: 4em;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+    
+    .masjid-text {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .masjid-name {
+      font-size: 2.2em;
+      font-weight: normal;
+      color: #f4c430;
+      font-family: 'Anton-Regular', 'Headlines-Bold', 'Gondens', 'Playfair Display', 'Amiri', serif;
+      letter-spacing: 1px;
+      font-style: normal;
+      text-decoration: none;
+    }
+    
+    .masjid-address {
+      font-size: 1.1em;
+      color: #ffffff;
+      opacity: 0.85;
+    }
+    
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 1.05fr 1.15fr;
+      gap: 15px;
+      padding: 10px 40px 0 40px;
+      flex: 1;
+      min-height: 0;
+    }
+    
+    .left-section {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      min-height: 0;
+    }
+    
+    .dynamic-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid rgba(244, 196, 48, 0.3);
+      transition: all 0.3s ease;
+      min-height: 120px;
+      height: auto;
+      max-height: none;
+    }
+    
+    #clockContainer,
+    #ayatContainer,
+    #financeContainer,
+    #petugasContainer {
+      margin-bottom: 15px;
+    }
+    
+    .container-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(244, 196, 48, 0.3);
+    }
+    
+    .container-title {
+      font-size: 0.9em;
+      font-weight: 700;
+      color: #f4c430;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .container-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .container-btn {
+      background: rgba(244, 196, 48, 0.2);
+      border: none;
+      color: #f4c430;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 0.8em;
+      transition: all 0.2s ease;
+    }
+    
+    .container-btn:hover {
+      background: rgba(244, 196, 48, 0.4);
+      transform: scale(1.1);
+    }
+    
+    .container-content {
+      font-size: 0.85em;
+      color: #ffffff;
+      line-height: 1.4;
+      min-height: auto;
+      height: auto;
+      max-height: none;
+    }
+    
+    .current-time {
+      font-size: 2.8em;
+      font-weight: 700;
+      color: #f4c430;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+      letter-spacing: 3px;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      position: static;
+    }
+    
+    .simple-clock-display {
+      background: transparent;
+      backdrop-filter: none;
+      border-radius: 0;
+      padding: 8px;
+      border: none;
+      transition: none;
+      min-height: 150px;
+      height: auto;
+      max-height: 350px;
+      margin-bottom: 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      position: static;
+    }
+    
+    .countdown-display {
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      position: static;
+    }
+    
+    .countdown-label {
+      font-size: 1.3em;
+      color: #f4c430;
+      margin: 2px 0 0 0;
+      font-weight: 600;
+      position: static;
+    }
+    
+    .countdown-time {
+      font-size: 2.8em; /* Match font size with current time */
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      position: static;
+    }
+    
+    .ayat-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 15px;
+      border: 2px solid rgba(244, 196, 48, 0.2);
+      animation: fadeIn 2s ease-in-out infinite alternate;
+      min-height: auto;
+      height: auto;
+      max-height: none;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0.7; }
+      to { opacity: 1; }
+    }
+    
+    .ayat-arab {
+      font-family: 'Amiri', serif;
+      font-size: 1.2em;
+      font-weight: 700;
+      text-align: center;
+      color: #f4c430;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .ayat-terjemahan {
+      font-size: 1.2em;
+      text-align: center;
+      color: #ffffff;
+      opacity: 0.9;
+      line-height: 1.4;
+    }
+    
+    .finance-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid rgba(244, 196, 48, 0.3);
+    }
+    
+    .finance-title {
+      font-size: 1.8em;
+      font-weight: normal;
+      color: #f4c430;
+      text-align: center;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-family: 'Anton-Regular', 'Heathergreen', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transform: scaleX(1.2);
+      transform-origin: center;
+    }
+    
+    .finance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    
+    .finance-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 8px;
+      border: 1px solid rgba(244, 196, 48, 0.2);
+    }
+    
+    .finance-label {
+      font-size: 1.5em;
+      color: #ffffff;
+      opacity: 0.8;
+      margin-bottom: 3px;
+    }
+    
+    .finance-amount {
+      font-size: 1em;
+      font-weight: 700;
+      color: #f4c430;
+    }
+    
+    /* Petugas Sholat Jumat Styles */
+    #petugasSection {
+      margin-top: 8px;
+    }
+    
+    /* Dynamic height for Petugas container */
+    #petugasContainer {
+      height: auto;
+      max-height: none;
+      min-height: auto;
+    }
+    
+    #petugasContainer .container-content {
+      height: auto;
+      max-height: none;
+      min-height: auto;
+    }
+    
+    .petugas-title {
+      font-size: 1.8em;
+      font-weight: normal;
+      color: #f4c430;
+      text-align: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(244, 196, 48, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-family: 'Anton-Regular', 'Heathergreen', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transform: scaleX(1.2);
+      transform-origin: center;
+    }
+    
+    .petugas-table-container {
+      overflow-x: auto;
+    }
+    
+    .petugas-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .petugas-table th {
+      background: rgba(244, 196, 48, 0.2);
+      color: #f4c430;
+      font-weight: 700;
+      padding: 4px 6px;
+      text-align: center;
+      font-size: 1.47em;
+      border-bottom: 1px solid rgba(244, 196, 48, 0.3);
+    }
+    
+    .petugas-table td {
+      padding: 3px 6px;
+      text-align: left;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 1.30em;
+    }
+    
+    .petugas-table td:first-child {
+      text-align: center;
+    }
+    
+    .petugas-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .petugas-table tbody tr:hover {
+      background: rgba(244, 196, 48, 0.1);
+    }
+    
+    .right-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+    
+    .media-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 5px;
+      height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(244, 196, 48, 0.3);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .media-slide {
+      position: absolute;
+      width: 150%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      font-size: 6em;
+    }
+    
+    .media-slide.active {
+      opacity: 1;
+    }
+    
+    .media-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .prayer-cards-wrapper {
+      padding: 10px 40px;
+      flex-shrink: 0;
+      margin-top: 25px;
+      position: relative;
+      border: none;
+      border-radius: 8px;
+    }
+    
+    .prayer-cards-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #f4c430, #f4c430, transparent);
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(244, 196, 48, 0.5);
+    }
+    
+    .prayer-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+    }
+    
+    .prayer-card {
+      background: transparent;
+      backdrop-filter: none;
+      border-radius: 6px;
+      padding: 8px 4px;
+      text-align: center;
+      border: 1px solid rgba(244, 196, 48, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .prayer-card.hidden {
+      display: none;
+    }
+    
+    .prayer-card.active {
+      background: transparent;
+      backdrop-filter: none;
+      border: 1px solid rgba(244, 196, 48, 0.6);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(244, 196, 48, 0.3);
+    }
+    
+    .prayer-icon {
+      font-size: 1.6em;
+      margin-bottom: 5px;
+    }
+    
+    .prayer-name {
+      font-size: 0.95em;
+      font-weight: 700;
+      color: #f4c430;
+      margin-bottom: 3px;
+    }
+    
+    .prayer-time {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    
+    .running-text-container {
+      background: transparent;
+      padding: 10px 0;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .running-text {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scroll 30s linear infinite;
+      font-size: 1.2em;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    @keyframes scroll {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #1a4d2e 0%, #2d5f3f 100%);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 90%;
+      overflow-y: auto;
+      border: 3px solid #f4c430;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f4c430;
+    }
+    
+    .modal-title {
+      font-size: 2em;
+      font-weight: 700;
+      color: #f4c430;
+    }
+    
+    .close-btn {
+      font-size: 2em;
+      cursor: pointer;
+      color: #ffffff;
+      transition: transform 0.3s ease;
+    }
+    
+    .close-btn:hover {
+      transform: scale(1.2);
+      color: #f4c430;
+    }
+    
+    .settings-section {
+      margin-top: 15px;
+      margin-bottom: 25px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(244, 196, 48, 0.3);
+    }
+    
+    .color-templates {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .template-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(244, 196, 48, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .template-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(244, 196, 48, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .color-preview {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .color-code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #f4c430;
+      flex-grow: 1;
+    }
+    
+    .btn-select-color {
+      padding: 6px 12px;
+      background: #f4c430;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-select-color:hover {
+      background: #e0b420;
+      transform: scale(1.05);
+    }
+    
+    .section-title {
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #f4c430;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 2em; /* Doubled from 1em to make labels twice as large */
+    }
+    
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid rgba(244, 196, 48, 0.3);
+      background: rgba(255, 255, 255, 0.9);
+      color: #1a4d2e;
+      font-size: 1em;
+      font-weight: 600;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #f4c430;
+    }
+    
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    
+    .checkbox-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .checkbox-item label {
+      cursor: pointer;
+      font-size: 0.95em;
+      color: #ffffff;
+    }
+    
+    .btn {
+      padding: 12px 30px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1.1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn-primary {
+      background: #f4c430;
+      color: #1a4d2e;
+    }
+    
+    .btn-primary:hover {
+      background: #ffd700;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 196, 48, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      background: #999;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .save-section {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid rgba(244, 196, 48, 0.3);
+    }
+    
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    
+    .finance-grid-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    
+    .slide-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 2px solid rgba(244, 196, 48, 0.2);
+    }
+    
+    .slide-header {
+      font-size: 1.1em;
+      font-weight: 700;
+      color: #f4c430;
+      margin-bottom: 12px;
+    }
+    
+    .slide-type-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    
+    .type-btn {
+      flex: 1;
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 2px solid rgba(244, 196, 48, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 0.9em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .type-btn.active {
+      background: #f4c430;
+      color: #1a4d2e;
+      border-color: #f4c430;
+    }
+    
+    .type-btn:hover {
+      background: rgba(244, 196, 48, 0.3);
+    }
+    
+    .slide-content-input {
+      display: none;
+    }
+    
+    .slide-content-input.active {
+      display: block;
+    }
+    
+    .file-upload-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-upload-label {
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px dashed rgba(244, 196, 48, 0.5);
+      background: rgba(255, 255, 255, 0.9);
+      color: #1a4d2e;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .file-upload-label:hover {
+      border-color: #f4c430;
+      background: #ffffff;
+    }
+    
+    .file-upload-input {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .preview-container {
+      margin-top: 10px;
+      text-align: center;
+    }
+    
+    .preview-image {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+      border: 2px solid #f4c430;
+    }
+    
+    .preview-emoji {
+      font-size: 4em;
+    }
+    
+    .panel-content {
+      display: none;
+    }
+    
+    .panel-content.active {
+      display: block;
+    }
+    
+    .success-message {
+      background: rgba(74, 222, 128, 0.2);
+      border: 2px solid #4ade80;
+      color: #4ade80;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.1em;
+      margin-top: 15px;
+    }
+    
+    /* Video Overlay Styles */
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .video-overlay.active {
+      display: flex;
+    }
+    
+    .video-player {
+      max-width: 95%;
+      max-height: 95%;
+      width: auto;
+      height: auto;
+      outline: none;
+      background: black;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+
+ </head>
+ <body class="h-full">
+  <!-- Ramadhan Images - Multiple draggable and resizable images -->
+  <div class="ramadhan-image-wrapper" id="ramadhanImageWrapper1">
+   <img src="bgbanner/ramadhan1.png" alt="Ramadhan" class="ramadhan-image-direct" id="ramadhanImage1">
+   <div class="resize-handle resize-handle-br"></div>
+   <div class="resize-handle resize-handle-bl"></div>
+   <div class="resize-handle resize-handle-tr"></div>
+   <div class="resize-handle resize-handle-tl"></div>
+  </div>
+  
+  <div class="ramadhan-image-wrapper" id="ramadhanImageWrapper2">
+   <img src="bgbanner/ramadhan2.png" alt="Ramadhan" class="ramadhan-image-direct" id="ramadhanImage2">
+   <div class="resize-handle resize-handle-br"></div>
+   <div class="resize-handle resize-handle-bl"></div>
+   <div class="resize-handle resize-handle-tr"></div>
+   <div class="resize-handle resize-handle-tl"></div>
+  </div>
+  
+  <div class="ramadhan-image-wrapper" id="ramadhanImageWrapper3">
+   <img src="bgbanner/ramadhan3.png" alt="Ramadhan" class="ramadhan-image-direct" id="ramadhanImage3">
+   <div class="resize-handle resize-handle-br"></div>
+   <div class="resize-handle resize-handle-bl"></div>
+   <div class="resize-handle resize-handle-tr"></div>
+   <div class="resize-handle resize-handle-tl"></div>
+  </div>
+  
+  <div class="ramadhan-image-wrapper" id="ramadhanImageWrapper4">
+   <img src="bgbanner/ramadhan4.png" alt="Ramadhan" class="ramadhan-image-direct" id="ramadhanImage4">
+   <div class="resize-handle resize-handle-br"></div>
+   <div class="resize-handle resize-handle-bl"></div>
+   <div class="resize-handle resize-handle-tr"></div>
+   <div class="resize-handle resize-handle-tl"></div>
+  </div>
+  <div class="main-container">
+   <!-- Header Banner -->
+   <div class="header-banner">
+    <div class="masjid-info">
+     <div class="masjid-logo" id="masjidLogo">
+      🕌
+     </div>
+     <div class="masjid-text">
+      <div class="masjid-name" id="masjidName">
+       Masjid Misbahul Khoir
+      </div>
+      <div class="masjid-address" id="masjidAddress">
+       Jl. Contoh No. 123, Jakarta
+      </div>
+     </div>
+    </div>
+    <div class="settings-icon" onclick="openSettings()">
+     ⚙️
+    </div>
+    <div class="fullscreen-icon" onclick="toggleFullscreen()">
+     ↗️
+    </div>
+    <div class="date-section">
+     <div class="date-masehi" id="dateMasehi">
+      Senin, 1 Januari 2024
+     </div>
+     <div class="date-hijri" id="dateHijri">
+      18 Jumadil Akhir 1445 H
+     </div>
+    </div>
+   </div><!-- Content Wrapper -->
+   <div class="content-wrapper"><!-- Left Section -->
+    <div class="left-section">
+      <!-- Simple Clock and Countdown without containers -->
+      <div class="simple-clock-display">
+        <div class="current-time" id="currentTime">
+          00:00:00
+        </div>
+        <div class="countdown-display">
+          <div class="countdown-label" id="countdownLabel">
+           Menuju Sholat Subuh
+          </div>
+          <div class="countdown-time" id="countdownTime">
+           00:00:00
+          </div>
+        </div>
+      </div>
+      
+      <!-- Dynamic Containers Area for other elements -->
+      <div id="dynamicContainers">
+        
+
+        
+        <!-- Finance / Announcement Section -->
+        <div class="dynamic-container" id="financeContainer" data-container-id="finance">
+          <div class="container-header">
+            <div class="container-title">Keuangan</div>
+            <div class="container-actions">
+              <button class="container-btn" onclick="moveContainer(this, 'up')" title="Pindahkan ke atas">↑</button>
+              <button class="container-btn" onclick="moveContainer(this, 'down')" title="Pindahkan ke bawah">↓</button>
+              <button class="container-btn" onclick="removeContainer(this)" title="Hapus kontainer">✕</button>
+            </div>
+          </div>
+          <div class="container-content">
+            <div id="financeSection">
+              <div class="finance-title" id="panelTitle">
+               💰 Keuangan Masjid
+              </div>
+              <div class="finance-grid" id="financeDisplay">
+               <div class="finance-item">
+                <div class="finance-label">
+                 Saldo Kas
+                </div>
+                <div class="finance-amount" id="financeKas" contenteditable="true" onclick="this.focus();this.select();">
+                 Rp 15.250.000
+                </div>
+               </div>
+               <div class="finance-item">
+                <div class="finance-label">
+                 Pemasukan Bulan Ini
+                </div>
+                <div class="finance-amount" id="financePemasukan" contenteditable="true" onclick="this.focus();this.select();">
+                 Rp 8.500.000
+                </div>
+               </div>
+               <div class="finance-item">
+                <div class="finance-label">
+                 Pengeluaran Bulan Ini
+                </div>
+                <div class="finance-amount" id="financePengeluaran" contenteditable="true" onclick="this.focus();this.select();">
+                 Rp 3.200.000
+                </div>
+               </div>
+               <div class="finance-item">
+                <div class="finance-label">
+                 Infaq Minggu ini:
+                </div>
+                <div class="finance-amount" id="financeTarget" contenteditable="true" onclick="this.focus();this.select();">
+                 Rp 50.000.000
+                </div>
+               </div>
+              </div>
+              <div id="pengumumanDisplay" style="display: none;">
+               <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px;">
+                <div id="pengumumanJudulDisplay" style="font-size: 1.1em; font-weight: 700; color: #f4c430; margin-bottom: 10px; text-align: center;" contenteditable="true" onclick="this.focus();this.select();">
+                 PENGUMUMAN
+                </div>
+                <div id="pengumumanIsiDisplay" style="font-size: 0.95em; color: #ffffff; line-height: 1.6; text-align: left;" contenteditable="true" onclick="this.focus();this.select();">
+                 Belum ada pengumuman.
+                </div>
+               </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Data Petugas Section -->
+        <div class="dynamic-container" id="petugasContainer" data-container-id="petugas">
+          <div class="container-header">
+            <div class="container-title">Petugas Sholat Jumat</div>
+            <div class="container-actions">
+              <button class="container-btn" onclick="moveContainer(this, 'up')" title="Pindahkan ke atas">↑</button>
+              <button class="container-btn" onclick="moveContainer(this, 'down')" title="Pindahkan ke bawah">↓</button>
+              <button class="container-btn" onclick="removeContainer(this)" title="Hapus kontainer">✕</button>
+            </div>
+          </div>
+          <div class="container-content">
+            <div id="petugasSection">
+              <div class="petugas-title">
+               DAFTAR PETUGAS SHOLAT JUMAT
+               <!-- Test button for debugging -->
+               <button onclick="testSaveLoad()" style="margin-left: 10px; padding: 2px 8px; font-size: 0.8em; display: none;">Test Save/Load</button>
+              </div>
+              <div class="petugas-table-container">
+               <table class="petugas-table">
+                <thead>
+                 <tr>
+                  <th>NO</th>
+                  <th>H A R I</th>
+                  <th>I M A M</th>
+                  <th>K H O T I B</th>
+                  <th>M U A D Z I N</th>
+                 </tr>
+                </thead>
+                <tbody>
+                 <tr>
+                  <td>1</td>
+                  <td>Jumat Pon</td>
+                  <td>Ustadz Ahmad Fauzi</td>
+                  <td>Ustadz Muhammad Rizki</td>
+                  <td>Abdul Hakim</td>
+                 </tr>
+                 <tr>
+                  <td>2</td>
+                  <td>Jumat Wage</td>
+                  <td>Ustadz Budi Santoso</td>
+                  <td>Ustadz Ali Rahman</td>
+                  <td>Muhammad Yusuf</td>
+                 </tr>
+                 <tr>
+                  <td>3</td>
+                  <td>Jumat Kliwon</td>
+                  <td>Ustadz Cahyo Prasetyo</td>
+                  <td>Ustadz Hasan Basri</td>
+                  <td>Siti Nurhaliza</td>
+                 </tr>
+                 <tr>
+                  <td>4</td>
+                  <td>Jumat Legi</td>
+                  <td>Ustadz Dedi Kurniawan</td>
+                  <td>Ustadz Ibrahim Siregar</td>
+                  <td>Rina Marlina</td>
+                 </tr>
+                 <tr>
+                  <td>5</td>
+                  <td>Jumat Pahing</td>
+                  <td>Ustadz Eko Sulistyo</td>
+                  <td>Ustadz Jamaluddin</td>
+                  <td>Dewi Kartika</td>
+                 </tr>
+                </tbody>
+               </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Add Container Button -->
+      <div style="text-align: center; padding: 10px; display: none;">
+        <button class="btn btn-primary" onclick="addNewContainer()" style="padding: 8px 15px; font-size: 0.9em;">+ Tambah Kontainer</button>
+      </div>
+    </div><!-- Right Section -->
+    <div class="right-section"><!-- Media Section -->
+     <div class="media-section" id="mediaSection">
+      <div class="media-slide active">
+       🕌
+      </div>
+     </div>
+     
+     <!-- Ayat Section -->
+     <div id="ayatContainer" data-container-id="ayat" style="margin-top: 15px;">
+       <div class="ayat-arab" id="ayatArab">
+        إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا
+       </div>
+       <div class="ayat-terjemahan" id="ayatTerjemahan">
+        Sesungguhnya sholat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman. (QS. An-Nisa: 103)
+       </div>
+     </div>
+    </div>
+   </div><!-- Prayer Cards - Horizontal -->
+   <div class="prayer-cards-wrapper">
+    <div class="prayer-cards" id="prayerCards">
+     <div class="prayer-card" data-prayer="imsak">
+      <div class="prayer-name">
+       IMSAK
+      </div>
+      <div class="prayer-time" id="timeImsak">
+       04:30
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="subuh">
+      <div class="prayer-name">
+       SUBUH
+      </div>
+      <div class="prayer-time" id="timeSubuh">
+       04:40
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="syuruq">
+      <div class="prayer-name">
+       SYURUQ
+      </div>
+      <div class="prayer-time" id="timeSyuruq">
+       05:55
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="dhuha">
+      <div class="prayer-name">
+       DHUHA
+      </div>
+      <div class="prayer-time" id="timeDhuha">
+       06:15
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="dzuhur">
+      <div class="prayer-name">
+       DZUHUR
+      </div>
+      <div class="prayer-time" id="timeDzuhur">
+       12:05
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="ashar">
+      <div class="prayer-name">
+       ASHAR
+      </div>
+      <div class="prayer-time" id="timeAshar">
+       15:15
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="maghrib">
+      <div class="prayer-name">
+       MAGHRIB
+      </div>
+      <div class="prayer-time" id="timeMaghrib">
+       18:00
+      </div>
+     </div>
+     <div class="prayer-card" data-prayer="isya">
+      <div class="prayer-name">
+       ISYA
+      </div>
+      <div class="prayer-time" id="timeIsya">
+       19:10
+      </div>
+     </div>
+    </div>
+   </div><!-- Running Text -->
+   <div class="running-text-container">
+    <div class="running-text" id="runningText">
+     Selamat datang di Masjid Misbahul Khoir • Kajian Rutin Setiap Jumat Ba'da Maghrib • Mari Makmurkan Masjid
+    </div>
+   </div>
+  </div><!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h2 class="modal-title">⚙️ Pengaturan Jadwal Sholat</h2><span class="close-btn" onclick="closeSettings()">✖</span>
+    </div>
+    <form id="settingsForm" onsubmit="saveSettings(event)"><!-- Informasi Masjid -->
+     <div class="settings-section">
+      <h3 class="section-title">🕌 Informasi Masjid</h3>
+      <div class="form-group"><label class="form-label" for="inputNamaMasjid">Nama Masjid</label> <input type="text" class="form-input" id="inputNamaMasjid" placeholder="Masukkan nama masjid">
+      </div>
+      <div class="form-group"><label class="form-label" for="inputLogoMasjid">Logo Masjid (Emoji)</label> <input type="text" class="form-input" id="inputLogoMasjid" placeholder="🕌" maxlength="2">
+      </div>
+      <div class="form-group"><label class="form-label" for="inputAlamatMasjid">Alamat Masjid</label> <input type="text" class="form-input" id="inputAlamatMasjid" placeholder="Masukkan alamat masjid">
+      </div>
+     </div><!-- Waktu Sholat -->
+     <div class="settings-section">
+      <h3 class="section-title">⏰ Waktu Sholat</h3>
+      <div class="time-grid">
+       <div class="form-group"><label class="form-label" for="inputImsak">IMSAK</label> <input type="time" class="form-input" id="inputImsak">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputSubuh">SUBUH</label> <input type="time" class="form-input" id="inputSubuh">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputSyuruq">SYURUQ</label> <input type="time" class="form-input" id="inputSyuruq">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputDhuha">DHUHA</label> <input type="time" class="form-input" id="inputDhuha">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputDzuhur">DZUHUR</label> <input type="time" class="form-input" id="inputDzuhur">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputAshar">ASHAR</label> <input type="time" class="form-input" id="inputAshar">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputMaghrib">MAGHRIB</label> <input type="time" class="form-input" id="inputMaghrib">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputIsya">ISYA</label> <input type="time" class="form-input" id="inputIsya">
+       </div>
+      </div>
+     </div><!-- Sembunyikan Waktu Sholat -->
+     <div class="settings-section">
+      <h3 class="section-title">🙈 Sembunyikan Waktu Sholat</h3>
+      <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px; font-size: 0.9em;">Centang untuk menyembunyikan waktu sholat tertentu dari tampilan</p>
+      <div class="checkbox-group">
+       <div class="checkbox-item"><input type="checkbox" id="hideImsak"> <label for="hideImsak">Sembunyikan Imsak</label>
+       </div>
+       <div class="checkbox-item"><input type="checkbox" id="hideSyuruq"> <label for="hideSyuruq">Sembunyikan Syuruq</label>
+       </div>
+       <div class="checkbox-item"><input type="checkbox" id="hideDhuha"> <label for="hideDhuha">Sembunyikan Dhuha</label>
+       </div>
+      </div>
+     </div><!-- Sembunyikan Kontainer -->
+     <div class="settings-section">
+      <h3 class="section-title">🙈 Sembunyikan Kontainer</h3>
+      <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px; font-size: 0.9em;">Centang untuk menyembunyikan kontainer tertentu dari tampilan</p>
+      <div class="checkbox-group">
+       <div class="checkbox-item"><input type="checkbox" id="hideKeuangan"> <label for="hideKeuangan">Sembunyikan Keuangan Masjid</label>
+       </div>
+       <div class="checkbox-item"><input type="checkbox" id="hidePetugas"> <label for="hidePetugas">Sembunyikan Petugas Sholat Jumat</label>
+       </div>
+      </div>
+     </div>
+     
+     <!-- Sembunyikan Gambar Ramadhan -->
+     <div class="settings-section">
+      <h3 class="section-title">🖼️ Sembunyikan Gambar Ramadhan</h3>
+      <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px; font-size: 0.9em;">Centang untuk menyembunyikan gambar-gambar ramadhan dari tampilan</p>
+      <div class="checkbox-group">
+       <div class="checkbox-item"><input type="checkbox" id="hideRamadhan1"> <label for="hideRamadhan1">Sembunyikan Gambar 1 (ramadhan1.png)</label>
+       </div>
+       <div class="checkbox-item"><input type="checkbox" id="hideRamadhan2"> <label for="hideRamadhan2">Sembunyikan Gambar 2 (ramadhan2.png)</label>
+       </div>
+       <div class="checkbox-item"><input type="checkbox" id="hideRamadhan3"> <label for="hideRamadhan3">Sembunyikan Gambar 3 (ramadhan3.png)</label>
+       </div>
+       <div class="checkbox-item"><input type="checkbox" id="hideRamadhan4"> <label for="hideRamadhan4">Sembunyikan Gambar 4 (ramadhan4.png)</label>
+       </div>
+      </div>
+     </div>
+     
+     <!-- Tata Letak Dinamis -->
+     <div class="settings-section">
+      <h3 class="section-title">🔄 Tata Letak Dinamis</h3>
+      <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px; font-size: 0.9em;">Konfigurasi tampilan kontainer dinamis</p>
+      <div class="form-group">
+       <label class="form-label" for="containerOrder">Urutan Kontainer (pisahkan dengan koma)</label>
+       <input type="text" class="form-input" id="containerOrder" placeholder="clock,ayat,finance,petugas">
+      </div>
+      <div class="checkbox-item" style="margin-top: 15px;">
+       <input type="checkbox" id="enableDynamicLayout"> 
+       <label for="enableDynamicLayout">Aktifkan Tata Letak Dinamis</label>
+      </div>
+     </div><!-- Gambar Slide -->
+     <div class="settings-section">
+      <h3 class="section-title">🖼️ Gambar Slide (5 Slot)</h3>
+      <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px; font-size: 0.9em;">Pilih jenis konten: URL Gambar atau Upload dari Komputer</p><!-- Slide 1 -->
+      <div class="slide-item">
+       <div class="slide-header">
+        📌 Slide 1
+       </div>
+       <div class="slide-type-selector"><button type="button" class="type-btn active" onclick="selectSlideType(1, 'url')">🔗 URL Gambar</button> <button type="button" class="type-btn" onclick="selectSlideType(1, 'upload')">📤 Upload</button>
+       </div>
+       <div id="slide1-url" class="slide-content-input active"><input type="text" class="form-input" id="inputSlide1Url" placeholder="https://example.com/image.jpg">
+       </div>
+       <div id="slide1-upload" class="slide-content-input">
+        <div class="file-upload-wrapper"><label for="fileSlide1" class="file-upload-label"> 📂 Klik untuk pilih gambar </label> <input type="file" id="fileSlide1" class="file-upload-input" accept="image/*" onchange="handleFileUpload(1)">
+        </div>
+        <div id="preview1" class="preview-container"></div>
+       </div>
+      </div><!-- Slide 2 -->
+      <div class="slide-item">
+       <div class="slide-header">
+        📌 Slide 2
+       </div>
+       <div class="slide-type-selector"><button type="button" class="type-btn active" onclick="selectSlideType(2, 'url')">🔗 URL Gambar</button> <button type="button" class="type-btn" onclick="selectSlideType(2, 'upload')">📤 Upload</button>
+       </div>
+       <div id="slide2-url" class="slide-content-input active"><input type="text" class="form-input" id="inputSlide2Url" placeholder="https://example.com/image.jpg">
+       </div>
+       <div id="slide2-upload" class="slide-content-input">
+        <div class="file-upload-wrapper"><label for="fileSlide2" class="file-upload-label"> 📂 Klik untuk pilih gambar </label> <input type="file" id="fileSlide2" class="file-upload-input" accept="image/*" onchange="handleFileUpload(2)">
+        </div>
+        <div id="preview2" class="preview-container"></div>
+       </div>
+      </div><!-- Slide 3 -->
+      <div class="slide-item">
+       <div class="slide-header">
+        📌 Slide 3
+       </div>
+       <div class="slide-type-selector"><button type="button" class="type-btn active" onclick="selectSlideType(3, 'url')">🔗 URL Gambar</button> <button type="button" class="type-btn" onclick="selectSlideType(3, 'upload')">📤 Upload</button>
+       </div>
+       <div id="slide3-url" class="slide-content-input active"><input type="text" class="form-input" id="inputSlide3Url" placeholder="https://example.com/image.jpg">
+       </div>
+       <div id="slide3-upload" class="slide-content-input">
+        <div class="file-upload-wrapper"><label for="fileSlide3" class="file-upload-label"> 📂 Klik untuk pilih gambar </label> <input type="file" id="fileSlide3" class="file-upload-input" accept="image/*" onchange="handleFileUpload(3)">
+        </div>
+        <div id="preview3" class="preview-container"></div>
+       </div>
+      </div><!-- Slide 4 -->
+      <div class="slide-item">
+       <div class="slide-header">
+        📌 Slide 4
+       </div>
+       <div class="slide-type-selector"><button type="button" class="type-btn active" onclick="selectSlideType(4, 'url')">🔗 URL Gambar</button> <button type="button" class="type-btn" onclick="selectSlideType(4, 'upload')">📤 Upload</button>
+       </div>
+       <div id="slide4-url" class="slide-content-input active"><input type="text" class="form-input" id="inputSlide4Url" placeholder="https://example.com/image.jpg">
+       </div>
+       <div id="slide4-upload" class="slide-content-input">
+        <div class="file-upload-wrapper"><label for="fileSlide4" class="file-upload-label"> 📂 Klik untuk pilih gambar </label> <input type="file" id="fileSlide4" class="file-upload-input" accept="image/*" onchange="handleFileUpload(4)">
+        </div>
+        <div id="preview4" class="preview-container"></div>
+       </div>
+      </div><!-- Slide 5 -->
+      <div class="slide-item">
+       <div class="slide-header">
+        📌 Slide 5
+       </div>
+       <div class="slide-type-selector"><button type="button" class="type-btn active" onclick="selectSlideType(5, 'url')">🔗 URL Gambar</button> <button type="button" class="type-btn" onclick="selectSlideType(5, 'upload')">📤 Upload</button>
+       </div>
+       <div id="slide5-url" class="slide-content-input active"><input type="text" class="form-input" id="inputSlide5Url" placeholder="https://example.com/image.jpg">
+       </div>
+       <div id="slide5-upload" class="slide-content-input">
+        <div class="file-upload-wrapper"><label for="fileSlide5" class="file-upload-label"> 📂 Klik untuk pilih gambar </label> <input type="file" id="fileSlide5" class="file-upload-input" accept="image/*" onchange="handleFileUpload(5)">
+        </div>
+        <div id="preview5" class="preview-container"></div>
+       </div>
+      </div>
+     </div><!-- Pengaturan Tanggal -->
+     <div class="settings-section">
+      <h3 class="section-title">📅 Pengaturan Tanggal</h3>
+      <div class="checkbox-item" style="margin-bottom: 15px;"><input type="checkbox" id="useManualDate"> <label for="useManualDate">Gunakan Tanggal Manual (Tidak Otomatis)</label>
+      </div>
+      <div class="form-group"><label class="form-label" for="inputManualDate">Tanggal Manual</label> <input type="date" class="form-input" id="inputManualDate">
+      </div>
+     </div><!-- Keuangan Masjid / Pengumuman -->
+     <div class="settings-section">
+      <h3 class="section-title">💰 Keuangan Masjid / 📢 Pengumuman</h3>
+      <div class="form-group" style="margin-bottom: 20px;"><label class="form-label">Mode Panel</label>
+       <div class="slide-type-selector"><button type="button" class="type-btn active" id="btnModeKeuangan" onclick="selectPanelMode('keuangan')">💰 Keuangan Masjid</button> <button type="button" class="type-btn" id="btnModePengumuman" onclick="selectPanelMode('pengumuman')">📢 Pengumuman</button>
+       </div>
+      </div><!-- Keuangan Content -->
+      <div id="panelKeuangan" class="panel-content active">
+       <div class="finance-grid-form">
+        <div class="form-group"><label class="form-label" for="inputSaldoKas">Saldo Kas</label> <input type="text" class="form-input" id="inputSaldoKas" placeholder="Rp 15.250.000">
+        </div>
+        <div class="form-group"><label class="form-label" for="inputPemasukan">Pemasukan Bulan Ini</label> <input type="text" class="form-input" id="inputPemasukan" placeholder="Rp 8.500.000">
+        </div>
+        <div class="form-group"><label class="form-label" for="inputPengeluaran">Pengeluaran Bulan Ini</label> <input type="text" class="form-input" id="inputPengeluaran" placeholder="Rp 3.200.000">
+        </div>
+        <div class="form-group"><label class="form-label" for="inputTarget">Infaq Minggu ini:</label> <input type="text" class="form-input" id="inputTarget" placeholder="Rp 50.000.000">
+        </div>
+       </div>
+      </div><!-- Pengumuman Content -->
+      <div id="panelPengumuman" class="panel-content">
+       <div class="form-group"><label class="form-label" for="inputPengumumanJudul">Judul Pengumuman</label> <input type="text" class="form-input" id="inputPengumumanJudul" placeholder="Contoh: PENGUMUMAN PENTING">
+       </div>
+       <div class="form-group"><label class="form-label" for="inputPengumumanIsi">Isi Pengumuman</label> <textarea class="form-textarea" id="inputPengumumanIsi" placeholder="Tulis isi pengumuman di sini..." style="min-height: 150px;"></textarea>
+       </div>
+      </div>
+     </div><!-- Template Warna Background -->
+     <div class="settings-section">
+      <h3 class="section-title">🎨 Template Warna Background</h3>
+      <div class="color-templates">
+       <div class="template-item">
+        <div class="color-preview" style="background-color: #06402B;"></div>
+        <span class="color-code">#06402B</span>
+        <button type="button" class="btn-select-color" onclick="applyBackgroundColor('#06402B')">Pilih</button>
+       </div>
+       <div class="template-item">
+        <div class="color-preview" style="background-color: #0E2235;"></div>
+        <span class="color-code">#0E2235</span>
+        <button type="button" class="btn-select-color" onclick="applyBackgroundColor('#0E2235')">Pilih</button>
+       </div>
+       <div class="template-item">
+        <div class="color-preview" style="background-color: #03080C;"></div>
+        <span class="color-code">#03080C</span>
+        <button type="button" class="btn-select-color" onclick="applyBackgroundColor('#03080C')">Pilih</button>
+       </div>
+       <div class="template-item">
+        <div class="color-preview" style="background-color: #151B54;"></div>
+        <span class="color-code">#151B54</span>
+        <button type="button" class="btn-select-color" onclick="applyBackgroundColor('#151B54')">Pilih</button>
+       </div>
+       <div class="template-item">
+        <div class="color-preview" style="background-color: #660000;"></div>
+        <span class="color-code">#660000</span>
+        <button type="button" class="btn-select-color" onclick="applyBackgroundColor('#660000')">Pilih</button>
+       </div>
+       <div class="template-item">
+        <div class="color-preview" style="background-color: #380a18;"></div>
+        <span class="color-code">#380a18</span>
+        <button type="button" class="btn-select-color" onclick="applyBackgroundColor('#380a18')">Pilih</button>
+       </div>
+      </div>
+     </div>
+     
+     <!-- Video Settings -->
+     <div class="settings-section">
+      <h3 class="section-title">🎥 Video Display</h3>
+      <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px; font-size: 0.9em;">Pilih video lokal untuk ditampilkan secara otomatis</p>
+      
+      <!-- Video Selection Checkboxes -->
+      <div class="form-group">
+       <label class="form-label">Pilih Video untuk Ditampilkan:</label>
+       <div class="checkbox-group">
+        <div class="checkbox-item">
+         <input type="checkbox" id="showVideoRamadhan"> 
+         <label for="showVideoRamadhan">Ramadhan Video (ramadhan.mp4)</label>
+        </div>
+        <div class="checkbox-item">
+         <input type="checkbox" id="showVideoIdulFitri"> 
+         <label for="showVideoIdulFitri">Idul Fitri Video (idul fitri.mp4)</label>
+        </div>
+        <div class="checkbox-item">
+         <input type="checkbox" id="showVideoIdhulAdha"> 
+         <label for="showVideoIdhulAdha">Idhul Adha Video (idhuladha.mp4)</label>
+        </div>
+       </div>
+      </div>
+      
+      <!-- Video Interval Setting -->
+      <div class="form-group">
+       <label class="form-label" for="videoInterval">Interval Tampil Video (menit)</label>
+       <input type="number" class="form-input" id="videoInterval" min="1" max="60" value="10" placeholder="10">
+       <p style="color: #ffffff; opacity: 0.7; font-size: 0.85em; margin-top: 5px;">Video akan muncul setiap interval waktu yang ditentukan</p>
+      </div>
+      
+      <!-- Video Duration Setting -->
+      <div class="form-group">
+       <label class="form-label" for="videoDuration">Durasi Video Fullscreen (detik)</label>
+       <input type="number" class="form-input" id="videoDuration" min="10" max="120" value="30" placeholder="30">
+       <p style="color: #ffffff; opacity: 0.7; font-size: 0.85em; margin-top: 5px;">Durasi video ditampilkan dalam mode fullscreen</p>
+      </div>
+     </div>
+     
+     <!-- Running Text -->
+     <div class="settings-section">
+      <h3 class="section-title">📰 Running Text</h3>
+      <div class="form-group"><label class="form-label" for="inputRunningText">Teks Berjalan</label> <textarea class="form-textarea" id="inputRunningText" placeholder="Masukkan teks berjalan yang akan ditampilkan"></textarea>
+      </div>
+     </div><!-- Save Button -->
+     <div class="save-section"><button type="submit" class="btn btn-primary" id="saveBtn"> 💾 Simpan Pengaturan </button>
+     </div>
+    </form>
+   </div>
+  </div>
+  <script>
+    const ayatCollection = [
+      {
+        arab: "إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا",
+        terjemahan: "Sesungguhnya sholat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman. (QS. An-Nisa: 103)"
+      },
+      {
+        arab: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
+        terjemahan: "Dan dirikanlah sholat, tunaikanlah zakat dan ruku'lah beserta orang-orang yang ruku'. (QS. Al-Baqarah: 43)"
+      },
+      {
+        arab: "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ وَإِنَّهَا لَكَبِيرَةٌ إِلَّا عَلَى الْخَاشِعِينَ",
+        terjemahan: "Jadikanlah sabar dan sholat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyuk. (QS. Al-Baqarah: 45)"
+      },
+      {
+        arab: "حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ",
+        terjemahan: "Peliharalah semua sholat dan sholat wustha. Dan berdirilah karena Allah dengan khusyu'. (QS. Al-Baqarah: 238)"
+      },
+      {
+        arab: "فَإِذَا قَضَيْتُمُ الصَّلَاةَ فَاذْكُرُوا اللَّهَ قِيَامًا وَقُعُودًا وَعَلَىٰ جُنُوبِكُمْ",
+        terjemahan: "Maka apabila kamu telah menyelesaikan sholat, ingatlah Allah di waktu berdiri, di waktu duduk dan di waktu berbaring. (QS. An-Nisa: 103)"
+      },
+      {
+        arab: "إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ",
+        terjemahan: "Sesungguhnya sholat itu mencegah dari perbuatan keji dan mungkar. (QS. Al-Ankabut: 45)"
+      },
+      {
+        arab: "قَدْ أَفْلَحَ الْمُؤْمِنُونَ الَّذِينَ هُمْ فِي صَلَاتِهِمْ خَاشِعُونَ",
+        terjemahan: "Sesungguhnya beruntunglah orang-orang yang beriman, yaitu orang-orang yang khusyu' dalam sholatnya. (QS. Al-Mu'minun: 1-2)"
+      }
+    ];
+    
+    let currentAyatIndex = 0;
+    let currentSettings = null;
+    let mediaSlideInterval = null;
+    let slideTypes = {1: 'url', 2: 'url', 3: 'url', 4: 'url', 5: 'url'};
+    
+    // Adhan notification variables
+    let lastAdhanTime = null;
+    let adhanTimeout = null;
+    
+    // Video variables
+    let videoTimer = null;
+    let videoTimeout = null;
+    let availableVideos = [
+      { id: 'ramadhan', file: 'video/ramadhan.mp4', checkbox: 'showVideoRamadhan' },
+      { id: 'idul_fitri', file: 'video/idul fitri.mp4', checkbox: 'showVideoIdulFitri' },
+      { id: 'idhul_adha', file: 'video/idhuladha.mp4', checkbox: 'showVideoIdhulAdha' }
+    ];
+    
+    const prayerNames = {
+      imsak: "Imsak",
+      subuh: "Subuh",
+      syuruq: "Syuruq",
+      dhuha: "Dhuha",
+      dzuhur: "Dzuhur",
+      ashar: "Ashar",
+      maghrib: "Maghrib",
+      isya: "Isya"
+    };
+    
+    const hijriMonths = [
+      "Muharram", "Safar", "Rabiul Awal", "Rabiul Akhir",
+      "Jumadil Awal", "Jumadil Akhir", "Rajab", "Sya'ban",
+      "Ramadhan", "Syawal", "Dzulqa'dah", "Dzulhijjah"
+    ];
+    
+    const dayNames = ["Ahad", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const monthNames = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    
+    const defaultSettings = {
+      nama_masjid: "Masjid Misbahul Khoir",
+      logo_masjid: "🕌",
+      alamat_masjid: "Jl. Contoh No. 123, Jakarta",
+      waktu_imsak: "04:30",
+      waktu_subuh: "04:40",
+      waktu_syuruq: "05:55",
+      waktu_dhuha: "06:15",
+      waktu_dzuhur: "12:05",
+      waktu_ashar: "15:15",
+      waktu_maghrib: "18:00",
+      waktu_isya: "19:10",
+      running_text: "Selamat datang di Masjid Misbahul Khoir • Kajian Rutin Setiap Jumat Ba'da Maghrib • Mari Makmurkan Masjid",
+      panel_mode: "keuangan",
+      saldo_kas: "Rp 15.250.000",
+      pemasukan_bulan_ini: "Rp 8.500.000",
+      pengeluaran_bulan_ini: "Rp 3.200.000",
+      target_pembangunan: "Rp 50.000.000",
+      pengumuman_judul: "PENGUMUMAN",
+      pengumuman_isi: "Belum ada pengumuman.",
+      slide_1_type: "url",
+      slide_1_content: "slide/masjid1.jpg",
+      slide_2_type: "url",
+      slide_2_content: "slide/masjid2.jpg",
+      slide_3_type: "url",
+      slide_3_content: "slide/masjid3.jpg",
+      slide_4_type: "url",
+      slide_4_content: "slide/masjid4.jpg",
+      slide_5_type: "url",
+      slide_5_content: "slide/masjid5.jpg",
+      show_imsak: true,
+      show_subuh: true,
+      show_syuruq: true,
+      show_dhuha: true,
+      show_dzuhur: true,
+      show_ashar: true,
+      show_maghrib: true,
+      show_isya: true,
+      show_keuangan: true,
+      show_petugas: true,
+      show_ramadhan1: true,
+      show_ramadhan2: true,
+      show_ramadhan3: true,
+      show_ramadhan4: true,
+      show_video_ramadhan: false,
+      show_video_idul_fitri: false,
+      show_video_idhul_adha: false,
+      video_interval: 10,
+      video_duration: 30,
+      use_manual_date: false,
+      manual_date: "",
+      enable_dynamic_layout: false,
+      container_order: "clock,ayat,finance,petugas"
+    };
+    
+    // Load settings from localStorage
+    function loadSettings() {
+      const saved = localStorage.getItem('masjidSettings');
+      if (saved) {
+        currentSettings = JSON.parse(saved);
+      } else {
+        currentSettings = { ...defaultSettings };
+      }
+      loadDefaultSlideImages(); // Load default images into form
+      updateDisplay(); // This will call updateMediaSlides()
+    }
+    
+    // Load default slide images into form inputs
+    function loadDefaultSlideImages() {
+      // Set default images in form inputs
+      document.getElementById('inputSlide1Url').value = defaultSettings.slide_1_content;
+      document.getElementById('inputSlide2Url').value = defaultSettings.slide_2_content;
+      document.getElementById('inputSlide3Url').value = defaultSettings.slide_3_content;
+      document.getElementById('inputSlide4Url').value = defaultSettings.slide_4_content;
+      document.getElementById('inputSlide5Url').value = defaultSettings.slide_5_content;
+      
+      // Update preview containers
+      updateSlidePreview(1, defaultSettings.slide_1_content);
+      updateSlidePreview(2, defaultSettings.slide_2_content);
+      updateSlidePreview(3, defaultSettings.slide_3_content);
+      updateSlidePreview(4, defaultSettings.slide_4_content);
+      updateSlidePreview(5, defaultSettings.slide_5_content);
+      
+      // Update currentSettings with default slide content
+      if (currentSettings === null || Object.keys(currentSettings).length === 0) {
+        currentSettings = { ...defaultSettings };
+      } else {
+        currentSettings.slide_1_content = defaultSettings.slide_1_content;
+        currentSettings.slide_2_content = defaultSettings.slide_2_content;
+        currentSettings.slide_3_content = defaultSettings.slide_3_content;
+        currentSettings.slide_4_content = defaultSettings.slide_4_content;
+        currentSettings.slide_5_content = defaultSettings.slide_5_content;
+      }
+    }
+    
+    function selectPanelMode(mode) {
+      // Update button states
+      document.getElementById('btnModeKeuangan').classList.remove('active');
+      document.getElementById('btnModePengumuman').classList.remove('active');
+      
+      if (mode === 'keuangan') {
+        document.getElementById('btnModeKeuangan').classList.add('active');
+        document.getElementById('panelKeuangan').classList.add('active');
+        document.getElementById('panelPengumuman').classList.remove('active');
+      } else {
+        document.getElementById('btnModePengumuman').classList.add('active');
+        document.getElementById('panelPengumuman').classList.add('active');
+        document.getElementById('panelKeuangan').classList.remove('active');
+      }
+    }
+    
+    function selectSlideType(slideNum, type) {
+      slideTypes[slideNum] = type;
+      
+      // Update button states - get buttons from the parent slide item
+      const slideItem = event.target.closest('.slide-item');
+      const buttons = slideItem.querySelectorAll('.type-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Show/hide content inputs
+      document.getElementById(`slide${slideNum}-url`).classList.remove('active');
+      document.getElementById(`slide${slideNum}-upload`).classList.remove('active');
+      document.getElementById(`slide${slideNum}-${type}`).classList.add('active');
+    }
+    
+    function handleFileUpload(slideNum) {
+      const fileInput = document.getElementById(`fileSlide${slideNum}`);
+      const file = fileInput.files[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewContainer = document.getElementById(`preview${slideNum}`);
+          previewContainer.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Video Functions
+    function startVideoScheduler() {
+      if (videoTimer) {
+        clearInterval(videoTimer);
+      }
+      
+      if (!currentSettings) return;
+      
+      const intervalMinutes = currentSettings.video_interval || 10;
+      const intervalMs = intervalMinutes * 60 * 1000;
+      
+      // Start the scheduler
+      videoTimer = setInterval(showRandomVideo, intervalMs);
+      
+      // Show first video after a short delay
+      setTimeout(showRandomVideo, 5000); // Show first video after 5 seconds
+    }
+    
+    function showRandomVideo() {
+      if (!currentSettings) return;
+      
+      // Get enabled videos
+      const enabledVideos = availableVideos.filter(video => 
+        currentSettings[`show_video_${video.id}`] === true
+      );
+      
+      if (enabledVideos.length === 0) return;
+      
+      // Select random video
+      const randomIndex = Math.floor(Math.random() * enabledVideos.length);
+      const selectedVideo = enabledVideos[randomIndex];
+      
+      playVideo(selectedVideo.file);
+    }
+    
+    function playVideo(videoSrc) {
+      const overlay = document.getElementById('videoOverlay');
+      const video = document.getElementById('videoPlayer');
+      
+      if (!overlay || !video) return;
+      
+      // Set video source
+      video.src = videoSrc;
+      
+      // Show overlay
+      overlay.classList.add('active');
+      
+      // Wait for metadata to load before playing
+      video.onloadedmetadata = function() {
+        // Play video
+        video.play().then(() => {
+          // After video starts playing, enter fullscreen
+          setTimeout(() => {
+            enterFullscreen(video);
+          }, 100); // Small delay to ensure video is playing
+          
+          // Set timeout to pause video after it finishes playing or reaches the duration
+          const durationSeconds = currentSettings.video_duration || 30;
+          
+          // Listen for when the video ends naturally
+          video.addEventListener('ended', function() {
+            // Pause the video at the last frame
+            video.pause();
+            
+            // Set timeout to close video after 25 seconds pause
+            if (videoTimeout) {
+              clearTimeout(videoTimeout);
+            }
+            videoTimeout = setTimeout(() => {
+              closeVideo();
+            }, 25000); // 25 seconds pause
+          }, { once: true });
+          
+        }).catch(error => {
+          console.error('Error playing video:', error);
+          closeVideo();
+        });
+      };
+      
+      video.onerror = function() {
+        console.error('Error loading video:', videoSrc);
+        closeVideo();
+      };
+      
+      // Set timeout to close video after specified duration (backup)
+      const durationSeconds = currentSettings.video_duration || 30;
+      videoTimeout = setTimeout(() => {
+        // If video hasn't ended naturally, pause it and wait 25 seconds
+        video.pause();
+        
+        // Clear the previous timeout and set a new one for the 25-second pause
+        clearTimeout(videoTimeout);
+        videoTimeout = setTimeout(() => {
+          closeVideo();
+        }, 25000); // 25 seconds pause
+      }, durationSeconds * 1000);
+      
+      // Handle manual close
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+          closeVideo();
+        }
+      }, { once: true });
+    }
+    
+    function enterFullscreen(element) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen().catch(err => {
+          console.warn(`Fullscreen request failed: ${err.message}`);
+          // Try alternative methods if primary fails
+          fallbackFullscreen(element);
+        });
+      } else if (element.webkitRequestFullscreen) { /* Safari */
+        element.webkitRequestFullscreen().catch(err => {
+          console.warn(`Fullscreen request failed: ${err.message}`);
+          fallbackFullscreen(element);
+        });
+      } else if (element.mozRequestFullScreen) { /* Firefox */
+        element.mozRequestFullScreen().catch(err => {
+          console.warn(`Fullscreen request failed: ${err.message}`);
+          fallbackFullscreen(element);
+        });
+      } else if (element.msRequestFullscreen) { /* IE/Edge */
+        element.msRequestFullscreen().catch(err => {
+          console.warn(`Fullscreen request failed: ${err.message}`);
+          fallbackFullscreen(element);
+        });
+      } else {
+        // If native fullscreen isn't supported, use fallback
+        fallbackFullscreen(element);
+      }
+    }
+    
+    function fallbackFullscreen(element) {
+      // As a fallback, try to simulate fullscreen with CSS
+      element.style.position = 'fixed';
+      element.style.top = '0';
+      element.style.left = '0';
+      element.style.width = '100vw';
+      element.style.height = '100vh';
+      element.style.zIndex = '9999';
+      element.style.objectFit = 'contain';
+    }
+    
+    function closeVideo() {
+      const overlay = document.getElementById('videoOverlay');
+      const video = document.getElementById('videoPlayer');
+      
+      if (!overlay || !video) return;
+      
+      // Clear timeout
+      if (videoTimeout) {
+        clearTimeout(videoTimeout);
+        videoTimeout = null;
+      }
+      
+      // Exit fullscreen
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+      
+      // Reset fallback fullscreen styles if needed
+      video.style.position = '';
+      video.style.top = '';
+      video.style.left = '';
+      video.style.width = '';
+      video.style.height = '';
+      video.style.zIndex = '';
+      video.style.objectFit = '';
+      
+      // Pause and reset video
+      video.pause();
+      video.currentTime = 0;
+      video.src = '';
+      
+      // Hide overlay
+      overlay.classList.remove('active');
+    }
+    
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const deciseconds = String(Math.floor(now.getMilliseconds() / 100));
+      document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}.${deciseconds}`;
+    }
+    
+    function updateDates() {
+      let now;
+      
+      if (currentSettings && currentSettings.use_manual_date && currentSettings.manual_date) {
+        now = new Date(currentSettings.manual_date);
+      } else {
+        now = new Date();
+      }
+      
+      const dayName = dayNames[now.getDay()];
+      const date = now.getDate();
+      const monthName = monthNames[now.getMonth()];
+      const year = now.getFullYear();
+      
+      document.getElementById('dateMasehi').textContent = `${dayName}, ${date} ${monthName} ${year}`;
+      
+      const hijriDate = convertToHijri(now);
+      document.getElementById('dateHijri').textContent = `${hijriDate.day} ${hijriMonths[hijriDate.month - 1]} ${hijriDate.year} H`;
+    }
+    
+    function convertToHijri(gregorianDate) {
+      const adjustment = 0;
+      const today = new Date(gregorianDate);
+      if (adjustment) {
+        const adjustmilli = 1000 * 60 * 60 * 24 * adjustment;
+        const todaymilli = today.getTime() + adjustmilli;
+        today.setTime(todaymilli);
+      }
+      const day = today.getDate();
+      const month = today.getMonth();
+      const year = today.getFullYear();
+      let m = month + 1;
+      let y = year;
+      if (m < 3) {
+        y -= 1;
+        m += 12;
+      }
+      
+      const a = Math.floor(y / 100);
+      const b = 2 - a + Math.floor(a / 4);
+      const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
+      
+      const l = jd - 1948440 + 10632;
+      const n = Math.floor((l - 1) / 10631);
+      const l2 = l - 10631 * n + 354;
+      const j = (Math.floor((10985 - l2) / 5316)) * (Math.floor(50 * l2 / 17719)) + (Math.floor(l2 / 5670)) * (Math.floor(43 * l2 / 15238));
+      const l3 = l2 - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50)) - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
+      const hijriMonth = Math.floor((24 * l3) / 709);
+      const hijriDay = l3 - Math.floor((709 * hijriMonth) / 24);
+      const hijriYear = 30 * n + j - 30;
+      
+      return { day: hijriDay, month: hijriMonth, year: hijriYear };
+    }
+    
+    function parseTime(timeStr) {
+      if (!timeStr) return null;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const now = new Date();
+      const time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+      return time;
+    }
+    
+    function updateCountdown() {
+      const settings = currentSettings || defaultSettings;
+      
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+      const isFriday = dayOfWeek === 5; // Friday in JavaScript is 5
+      
+      // Extend prayer names to include Jumat for Friday
+      const extendedPrayerNames = { ...prayerNames };
+      if (isFriday) {
+        extendedPrayerNames['dzuhur'] = 'Jumat'; // On Friday, show 'Jumat' instead of 'Dzuhur'
+      }
+      const prayers = [];
+      
+      // Build prayer list with times from settings
+      if (settings.waktu_imsak && settings.show_imsak !== false) {
+        prayers.push({ name: 'imsak', time: parseTime(settings.waktu_imsak) });
+      }
+      if (settings.waktu_subuh && settings.show_subuh !== false) {
+        prayers.push({ name: 'subuh', time: parseTime(settings.waktu_subuh) });
+      }
+      if (settings.waktu_syuruq && settings.show_syuruq !== false) {
+        prayers.push({ name: 'syuruq', time: parseTime(settings.waktu_syuruq) });
+      }
+      if (settings.waktu_dhuha && settings.show_dhuha !== false) {
+        prayers.push({ name: 'dhuha', time: parseTime(settings.waktu_dhuha) });
+      }
+      if (settings.waktu_dzuhur && settings.show_dzuhur !== false) {
+        prayers.push({ name: 'dzuhur', time: parseTime(settings.waktu_dzuhur) });
+      }
+      if (settings.waktu_ashar && settings.show_ashar !== false) {
+        prayers.push({ name: 'ashar', time: parseTime(settings.waktu_ashar) });
+      }
+      if (settings.waktu_maghrib && settings.show_maghrib !== false) {
+        prayers.push({ name: 'maghrib', time: parseTime(settings.waktu_maghrib) });
+      }
+      if (settings.waktu_isya && settings.show_isya !== false) {
+        prayers.push({ name: 'isya', time: parseTime(settings.waktu_isya) });
+      }
+      
+      // Filter valid prayers
+      const validPrayers = prayers.filter(p => p.time !== null);
+      
+      if (validPrayers.length === 0) {
+        document.getElementById('countdownLabel').textContent = 'Menunggu Data Waktu Sholat';
+        document.getElementById('countdownTime').textContent = '00:00';
+        return;
+      }
+      
+      // Check for adhan notification
+      checkAdhanNotification(now, validPrayers);
+      
+      // Find next prayer after current time
+      let nextPrayer = null;
+      for (let prayer of validPrayers) {
+        if (prayer.time > now) {
+          nextPrayer = prayer;
+          break;
+        }
+      }
+      
+      // If no prayer found today, use first prayer of tomorrow
+      if (!nextPrayer) {
+        nextPrayer = { ...validPrayers[0] };
+        nextPrayer.time = new Date(nextPrayer.time);
+        nextPrayer.time.setDate(nextPrayer.time.getDate() + 1);
+      }
+      
+      const diff = nextPrayer.time.getTime() - now.getTime();
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      const prayerNameText = extendedPrayerNames[nextPrayer.name] || nextPrayer.name;
+      document.getElementById('countdownLabel').textContent = `Menuju ${prayerNameText}`;
+      document.getElementById('countdownTime').textContent = 
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      // Highlight active prayer card
+      document.querySelectorAll('.prayer-card').forEach(card => {
+        card.classList.remove('active');
+      });
+      const activeCard = document.querySelector(`[data-prayer="${nextPrayer.name}"]`);
+      if (activeCard && !activeCard.classList.contains('hidden')) {
+        activeCard.classList.add('active');
+      }
+    }
+    
+    function animateMediaSlides() {
+      if (mediaSlideInterval) {
+        clearInterval(mediaSlideInterval);
+      }
+      
+      const slides = document.querySelectorAll('.media-slide');
+      if (slides.length === 0) return;
+      
+      let currentSlide = 0;
+      
+      mediaSlideInterval = setInterval(() => {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+      }, 600000); // Changed from 4000ms (4 seconds) to 600000ms (10 minutes)
+    }
+    
+    function rotateAyat() {
+      currentAyatIndex = (currentAyatIndex + 1) % ayatCollection.length;
+      const currentAyat = ayatCollection[currentAyatIndex];
+      
+      document.getElementById('ayatArab').textContent = currentAyat.arab;
+      document.getElementById('ayatTerjemahan').textContent = currentAyat.terjemahan;
+      
+
+    }
+    
+    function updateDisplay() {
+      if (!currentSettings) return;
+      
+      // Update masjid info
+      document.getElementById('masjidName').textContent = currentSettings.nama_masjid;
+      document.getElementById('masjidAddress').textContent = currentSettings.alamat_masjid;
+      document.getElementById('masjidLogo').textContent = currentSettings.logo_masjid || '🕌';
+      
+      // Update prayer times
+      document.getElementById('timeImsak').textContent = currentSettings.waktu_imsak;
+      document.getElementById('timeSubuh').textContent = currentSettings.waktu_subuh;
+      document.getElementById('timeSyuruq').textContent = currentSettings.waktu_syuruq;
+      document.getElementById('timeDhuha').textContent = currentSettings.waktu_dhuha;
+      document.getElementById('timeDzuhur').textContent = currentSettings.waktu_dzuhur;
+      document.getElementById('timeAshar').textContent = currentSettings.waktu_ashar;
+      document.getElementById('timeMaghrib').textContent = currentSettings.waktu_maghrib;
+      document.getElementById('timeIsya').textContent = currentSettings.waktu_isya;
+      
+      // Update prayer names - special handling for Friday
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const isFriday = dayOfWeek === 5; // Friday is 5
+      
+      // Update the Dzuhur prayer name to Jumat on Fridays
+      const dzuhurElement = document.querySelector('[data-prayer="dzuhur"] .prayer-name');
+      if (dzuhurElement) {
+        dzuhurElement.textContent = isFriday ? 'JUMAT' : 'DZUHUR';
+      }
+      
+      // Show/hide prayer cards
+      document.querySelector('[data-prayer="imsak"]').classList.toggle('hidden', !currentSettings.show_imsak);
+      document.querySelector('[data-prayer="subuh"]').classList.toggle('hidden', !currentSettings.show_subuh);
+      document.querySelector('[data-prayer="syuruq"]').classList.toggle('hidden', !currentSettings.show_syuruq);
+      document.querySelector('[data-prayer="dhuha"]').classList.toggle('hidden', !currentSettings.show_dhuha);
+      document.querySelector('[data-prayer="dzuhur"]').classList.toggle('hidden', !currentSettings.show_dzuhur);
+      document.querySelector('[data-prayer="ashar"]').classList.toggle('hidden', !currentSettings.show_ashar);
+      document.querySelector('[data-prayer="maghrib"]').classList.toggle('hidden', !currentSettings.show_maghrib);
+      document.querySelector('[data-prayer="isya"]').classList.toggle('hidden', !currentSettings.show_isya);
+      
+      // Update running text
+      document.getElementById('runningText').textContent = currentSettings.running_text;
+      
+      // Update finance or announcement panel based on mode
+      const panelMode = currentSettings.panel_mode || 'keuangan';
+      
+      if (panelMode === 'pengumuman') {
+        document.getElementById('panelTitle').textContent = '📢 Pengumuman';
+        document.getElementById('financeDisplay').style.display = 'none';
+        document.getElementById('pengumumanDisplay').style.display = 'block';
+        document.getElementById('pengumumanJudulDisplay').textContent = currentSettings.pengumuman_judul || 'PENGUMUMAN';
+        document.getElementById('pengumumanIsiDisplay').textContent = currentSettings.pengumuman_isi || 'Belum ada pengumuman.';
+      } else {
+        document.getElementById('panelTitle').textContent = '💰 Keuangan Masjid';
+        document.getElementById('financeDisplay').style.display = 'grid';
+        document.getElementById('pengumumanDisplay').style.display = 'none';
+        document.getElementById('financeKas').textContent = currentSettings.saldo_kas || 'Rp 0';
+        document.getElementById('financePemasukan').textContent = currentSettings.pemasukan_bulan_ini || 'Rp 0';
+        document.getElementById('financePengeluaran').textContent = currentSettings.pengeluaran_bulan_ini || 'Rp 0';
+        document.getElementById('financeTarget').textContent = currentSettings.target_pembangunan || 'Rp 0';
+      }
+      
+      // Update media slides
+      updateMediaSlides();
+      
+      // Update dates
+      updateDates();
+      
+      // Update countdown
+      updateCountdown();
+      
+      // Show/hide containers
+      const financeSection = document.getElementById('financeSection');
+      const petugasSection = document.getElementById('petugasSection');
+      
+      if (financeSection) {
+        financeSection.style.display = currentSettings.show_keuangan !== false ? 'block' : 'none';
+      }
+      
+      if (petugasSection) {
+        petugasSection.style.display = currentSettings.show_petugas !== false ? 'block' : 'none';
+      }
+      
+      // Show/hide ramadhan images
+      const ramadhanImage1 = document.getElementById('ramadhanImageWrapper1');
+      const ramadhanImage2 = document.getElementById('ramadhanImageWrapper2');
+      const ramadhanImage3 = document.getElementById('ramadhanImageWrapper3');
+      const ramadhanImage4 = document.getElementById('ramadhanImageWrapper4');
+      
+      if (ramadhanImage1) {
+        ramadhanImage1.style.display = currentSettings.show_ramadhan1 !== false ? 'flex' : 'none';
+      }
+      
+      if (ramadhanImage2) {
+        ramadhanImage2.style.display = currentSettings.show_ramadhan2 !== false ? 'flex' : 'none';
+      }
+      
+      if (ramadhanImage3) {
+        ramadhanImage3.style.display = currentSettings.show_ramadhan3 !== false ? 'flex' : 'none';
+      }
+      
+      if (ramadhanImage4) {
+        ramadhanImage4.style.display = currentSettings.show_ramadhan4 !== false ? 'flex' : 'none';
+      }
+      
+      // Handle dynamic layout
+      if (currentSettings.enable_dynamic_layout) {
+        rearrangeContainers(currentSettings.container_order);
+      }
+      
+      // Start video scheduler
+      startVideoScheduler();
+    }
+    
+    function updateMediaSlides() {
+      if (!currentSettings) return;
+      
+      const mediaSection = document.getElementById('mediaSection');
+      mediaSection.innerHTML = '';
+      
+      // Create slides based on settings
+      for (let i = 1; i <= 5; i++) {
+        const slideType = currentSettings[`slide_${i}_type`];
+        const slideContent = currentSettings[`slide_${i}_content`];
+        
+        if (slideContent) {
+          const slide = document.createElement('div');
+          slide.className = 'media-slide';
+          if (i === 1) slide.classList.add('active');
+          
+          if (slideType === 'url' || slideType === 'upload') {
+            const img = document.createElement('img');
+            img.src = slideContent;
+            img.onerror = function() {
+              this.style.display = 'none';
+              this.alt = 'Gambar gagal dimuat';
+            };
+            slide.appendChild(img);
+          }
+          
+          mediaSection.appendChild(slide);
+        }
+      }
+      
+      // Restart animation
+      animateMediaSlides();
+    }
+    
+    function openSettings() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.add('active');
+      
+      // Populate form with current settings
+      if (currentSettings) {
+        document.getElementById('inputNamaMasjid').value = currentSettings.nama_masjid || '';
+        document.getElementById('inputLogoMasjid').value = currentSettings.logo_masjid || '';
+        document.getElementById('inputAlamatMasjid').value = currentSettings.alamat_masjid || '';
+        document.getElementById('inputImsak').value = currentSettings.waktu_imsak || '';
+        document.getElementById('inputSubuh').value = currentSettings.waktu_subuh || '';
+        document.getElementById('inputSyuruq').value = currentSettings.waktu_syuruq || '';
+        document.getElementById('inputDhuha').value = currentSettings.waktu_dhuha || '';
+        document.getElementById('inputDzuhur').value = currentSettings.waktu_dzuhur || '';
+        document.getElementById('inputAshar').value = currentSettings.waktu_ashar || '';
+        document.getElementById('inputMaghrib').value = currentSettings.waktu_maghrib || '';
+        document.getElementById('inputIsya').value = currentSettings.waktu_isya || '';
+        document.getElementById('inputSaldoKas').value = currentSettings.saldo_kas || '';
+        document.getElementById('inputPemasukan').value = currentSettings.pemasukan_bulan_ini || '';
+        document.getElementById('inputPengeluaran').value = currentSettings.pengeluaran_bulan_ini || '';
+        document.getElementById('inputTarget').value = currentSettings.target_pembangunan || '';
+        document.getElementById('inputRunningText').value = currentSettings.running_text || '';
+        document.getElementById('hideImsak').checked = !currentSettings.show_imsak;
+        document.getElementById('hideSyuruq').checked = !currentSettings.show_syuruq;
+        document.getElementById('hideDhuha').checked = !currentSettings.show_dhuha;
+        document.getElementById('hideKeuangan').checked = !currentSettings.show_keuangan;
+        document.getElementById('hidePetugas').checked = !currentSettings.show_petugas;
+        document.getElementById('hideRamadhan1').checked = !currentSettings.show_ramadhan1;
+        document.getElementById('hideRamadhan2').checked = !currentSettings.show_ramadhan2;
+        document.getElementById('hideRamadhan3').checked = !currentSettings.show_ramadhan3;
+        document.getElementById('hideRamadhan4').checked = !currentSettings.show_ramadhan4;
+        
+        // Load video settings
+        document.getElementById('showVideoRamadhan').checked = currentSettings.show_video_ramadhan || false;
+        document.getElementById('showVideoIdulFitri').checked = currentSettings.show_video_idul_fitri || false;
+        document.getElementById('showVideoIdhulAdha').checked = currentSettings.show_video_idhul_adha || false;
+        document.getElementById('videoInterval').value = currentSettings.video_interval || 10;
+        document.getElementById('videoDuration').value = currentSettings.video_duration || 30;
+        document.getElementById('useManualDate').checked = currentSettings.use_manual_date || false;
+        document.getElementById('inputManualDate').value = currentSettings.manual_date || '';
+        document.getElementById('enableDynamicLayout').checked = currentSettings.enable_dynamic_layout || false;
+        document.getElementById('containerOrder').value = currentSettings.container_order || 'clock,ayat,finance,petugas';
+        
+        // Load panel mode
+        const panelMode = currentSettings.panel_mode || 'keuangan';
+        selectPanelMode(panelMode);
+        
+        // Load pengumuman data
+        document.getElementById('inputPengumumanJudul').value = currentSettings.pengumuman_judul || '';
+        document.getElementById('inputPengumumanIsi').value = currentSettings.pengumuman_isi || '';
+        
+        // Load slide settings
+        for (let i = 1; i <= 5; i++) {
+          const slideType = currentSettings[`slide_${i}_type`] || 'url';
+          const slideContent = currentSettings[`slide_${i}_content`] || '';
+          
+          slideTypes[i] = slideType;
+          selectSlideType(i, slideType);
+          
+          if (slideType === 'url') {
+            document.getElementById(`inputSlide${i}Url`).value = slideContent;
+          } else if (slideType === 'upload' && slideContent) {
+            document.getElementById(`preview${i}`).innerHTML = 
+              `<img src="${slideContent}" class="preview-image" alt="Preview">`;
+          }
+        }
+      }
+    }
+    
+    // Update slide preview in the form
+    function updateSlidePreview(slideNum, imageUrl) {
+      if (imageUrl) {
+        const previewContainer = document.getElementById(`preview${slideNum}`);
+        if (previewContainer) {
+          previewContainer.innerHTML = `<img src="${imageUrl}" class="preview-image" alt="Preview Slide ${slideNum}">`;
+        }
+      }
+    }
+    
+    function closeSettings() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.remove('active');
+    }
+    
+    async function saveSettings(event) {
+      event.preventDefault();
+      
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '⏳ Menyimpan...';
+      
+      try {
+        // Determine panel mode
+        const panelMode = document.getElementById('btnModePengumuman').classList.contains('active') ? 'pengumuman' : 'keuangan';
+        
+        const newSettings = {
+          nama_masjid: document.getElementById('inputNamaMasjid').value || 'Masjid Misbahul Khoir',
+          logo_masjid: document.getElementById('inputLogoMasjid').value || '🕌',
+          alamat_masjid: document.getElementById('inputAlamatMasjid').value || 'Jl. Contoh No. 123',
+          waktu_imsak: document.getElementById('inputImsak').value || '04:30',
+          waktu_subuh: document.getElementById('inputSubuh').value || '04:40',
+          waktu_syuruq: document.getElementById('inputSyuruq').value || '05:55',
+          waktu_dhuha: document.getElementById('inputDhuha').value || '06:15',
+          waktu_dzuhur: document.getElementById('inputDzuhur').value || '12:05',
+          waktu_ashar: document.getElementById('inputAshar').value || '15:15',
+          waktu_maghrib: document.getElementById('inputMaghrib').value || '18:00',
+          waktu_isya: document.getElementById('inputIsya').value || '19:10',
+          panel_mode: panelMode,
+          saldo_kas: document.getElementById('inputSaldoKas').value || 'Rp 0',
+          pemasukan_bulan_ini: document.getElementById('inputPemasukan').value || 'Rp 0',
+          pengeluaran_bulan_ini: document.getElementById('inputPengeluaran').value || 'Rp 0',
+          target_pembangunan: document.getElementById('inputTarget').value || 'Rp 0',
+          pengumuman_judul: document.getElementById('inputPengumumanJudul').value || 'PENGUMUMAN',
+          pengumuman_isi: document.getElementById('inputPengumumanIsi').value || 'Belum ada pengumuman.',
+          running_text: document.getElementById('inputRunningText').value || 'Selamat datang',
+          show_imsak: !document.getElementById('hideImsak').checked,
+          show_subuh: true,
+          show_syuruq: !document.getElementById('hideSyuruq').checked,
+          show_dhuha: !document.getElementById('hideDhuha').checked,
+          show_dzuhur: true,
+          show_ashar: true,
+          show_maghrib: true,
+          show_isya: true,
+          show_keuangan: !document.getElementById('hideKeuangan').checked,
+          show_petugas: !document.getElementById('hidePetugas').checked,
+          show_ramadhan1: !document.getElementById('hideRamadhan1').checked,
+          show_ramadhan2: !document.getElementById('hideRamadhan2').checked,
+          show_ramadhan3: !document.getElementById('hideRamadhan3').checked,
+          show_ramadhan4: !document.getElementById('hideRamadhan4').checked,
+          show_video_ramadhan: document.getElementById('showVideoRamadhan').checked,
+          show_video_idul_fitri: document.getElementById('showVideoIdulFitri').checked,
+          show_video_idhul_adha: document.getElementById('showVideoIdhulAdha').checked,
+          video_interval: parseInt(document.getElementById('videoInterval').value) || 10,
+          video_duration: parseInt(document.getElementById('videoDuration').value) || 30,
+          use_manual_date: document.getElementById('useManualDate').checked,
+          manual_date: document.getElementById('inputManualDate').value || '',
+          enable_dynamic_layout: document.getElementById('enableDynamicLayout').checked,
+          container_order: document.getElementById('containerOrder').value || 'clock,ayat,finance,petugas'
+        };
+        
+        // Get slide settings
+        for (let i = 1; i <= 5; i++) {
+          const slideType = slideTypes[i];
+          let slideContent = '';
+          
+          if (slideType === 'url') {
+            slideContent = document.getElementById(`inputSlide${i}Url`).value || '';
+          } else if (slideType === 'upload') {
+            const fileInput = document.getElementById(`fileSlide${i}`);
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+              slideContent = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(new Error('Gagal membaca file'));
+                reader.readAsDataURL(fileInput.files[0]);
+              });
+            } else {
+              // Keep existing content if no new file uploaded
+              slideContent = (currentSettings && currentSettings[`slide_${i}_content`]) ? currentSettings[`slide_${i}_content`] : '';
+            }
+          }
+          
+          newSettings[`slide_${i}_type`] = slideType;
+          newSettings[`slide_${i}_content`] = slideContent;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('masjidSettings', JSON.stringify(newSettings));
+        currentSettings = newSettings;
+        updateDisplay();
+        
+        saveBtn.disabled = false;
+        saveBtn.textContent = '✅ Tersimpan!';
+        
+        // Restart video scheduler with new settings
+        setTimeout(() => {
+          startVideoScheduler();
+        }, 1000);
+        
+        setTimeout(() => {
+          saveBtn.textContent = '💾 Simpan Pengaturan';
+          closeSettings();
+        }, 1500);
+        
+      } catch (error) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '❌ Gagal!';
+        
+        setTimeout(() => {
+          saveBtn.textContent = '💾 Simpan Pengaturan';
+        }, 2000);
+      }
+    }
+    
+    // Adhan notification functions
+    function checkAdhanNotification(now, validPrayers) {
+      // Check for exact prayer time match (within 1 second)
+      const oneSecond = 1000; // 1 second in milliseconds
+      
+      for (let prayer of validPrayers) {
+        const timeDiff = Math.abs(now.getTime() - prayer.time.getTime());
+        
+        // Check if we're at the exact prayer time and it's not imsak or syuruq
+        if (timeDiff <= oneSecond && 
+            prayer.name !== 'imsak' && 
+            prayer.name !== 'syuruq' && 
+            prayer.name !== 'dhuha') {
+          
+          // Check if we haven't already triggered adhan for this prayer today
+          const prayerKey = `${prayer.name}_${prayer.time.toDateString()}`;
+          if (lastAdhanTime !== prayerKey) {
+            playAdhanNotification(prayer.name);
+            lastAdhanTime = prayerKey;
+            
+            // Reset the lastAdhanTime after 2 minutes to allow re-triggering
+            if (adhanTimeout) clearTimeout(adhanTimeout);
+            adhanTimeout = setTimeout(() => {
+              lastAdhanTime = null;
+            }, 2 * 60 * 1000);
+          }
+          break;
+        }
+      }
+    }
+    
+    function playAdhanNotification(prayerName) {
+      // Create notification popup
+      const notification = document.createElement('div');
+      notification.id = 'adhanNotification';
+      notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #1a4d2e 0%, #2d5f3f 100%);
+        border: 3px solid #f4c430;
+        border-radius: 20px;
+        padding: 30px 50px;
+        text-align: center;
+        z-index: 10000;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        animation: adhanAppear 0.5s ease-out;
+      `;
+      
+      notification.innerHTML = `
+        <div style="font-size: 3em; margin-bottom: 15px;">🕌</div>
+        <div style="font-size: 2.5em; font-weight: bold; color: #f4c430; margin-bottom: 10px;">SAATNYA ADZAN</div>
+        <div style="font-size: 2em; color: white; text-transform: uppercase; margin-bottom: 15px;">WAKTU SHOLAT ${prayerNames[prayerName] || prayerName}</div>
+        <div style="font-size: 1.2em; color: #ffffff; opacity: 0.9;">Dimohon mengisi shaf terdepan, berdzikir dan menunggu iqomah</div>
+      `;
+      
+      // Add CSS animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes adhanAppear {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        @keyframes adhanPulse {
+          0% { box-shadow: 0 0 0 0 rgba(244, 196, 48, 0.7); }
+          70% { box-shadow: 0 0 0 20px rgba(244, 196, 48, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(244, 196, 48, 0); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(notification);
+      
+      // Add pulsing effect to the notification
+      notification.style.animation += ', adhanPulse 2s infinite';
+      
+      // Remove notification after 3 minutes and show Iqomah notification
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'adhanAppear 0.5s ease-in reverse';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              document.body.removeChild(notification);
+              // Show Iqomah notification after adhan notification disappears
+              setTimeout(() => {
+                showIqomahNotification(prayerName);
+              }, 100);
+            }
+          }, 500);
+        }
+      }, 180000);
+      
+      // Try to play adhan sound if available
+      try {
+        const audio = new Audio('audio/adzan.mp3');
+        audio.volume = 0.7;
+        audio.play().catch(e => {
+          console.log('Could not play adhan sound:', e);
+        });
+      } catch (e) {
+        console.log('Adhan sound not available');
+      }
+    }
+    
+    function showIqomahNotification(prayerName) {
+      // Create Iqomah notification popup
+      const notification = document.createElement('div');
+      notification.id = 'iqomahNotification';
+      notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #1a4d2e 0%, #2d5f3f 100%);
+        border: 3px solid #f4c430;
+        border-radius: 20px;
+        padding: 30px 50px;
+        text-align: center;
+        z-index: 10000;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        animation: adhanAppear 0.5s ease-out;
+      `;
+      
+      notification.innerHTML = `
+        <div style="font-size: 3em; margin-bottom: 15px;">🕌</div>
+        <div style="font-size: 2.5em; font-weight: bold; color: #f4c430; margin-bottom: 10px;">10 MENIT MENUJU IQOMAH</div>
+        <div style="font-size: 1.5em; color: white; margin-bottom: 10px;">${prayerNames[prayerName] || prayerName}</div>
+        <div id="iqomahCountdown" style="font-size: 2em; font-weight: bold; color: #f4c430; margin-bottom: 15px;">10:00</div>
+        <div style="font-size: 1.2em; color: #ffffff; opacity: 0.9;">Demi kesempurnaan sholat, luruskan dan rapatkan shaf</div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Add pulsing effect to the notification
+      notification.style.animation += ', adhanPulse 2s infinite';
+      
+      // Start countdown timer
+      let countdownMinutes = 10;
+      let countdownSeconds = 0;
+      
+      const countdownInterval = setInterval(() => {
+        countdownSeconds--;
+        
+        if (countdownSeconds < 0) {
+          countdownSeconds = 59;
+          countdownMinutes--;
+        }
+        
+        if (countdownMinutes < 0) {
+          clearInterval(countdownInterval);
+          return;
+        }
+        
+        const countdownElement = document.getElementById('iqomahCountdown');
+        if (countdownElement) {
+          countdownElement.textContent = `${countdownMinutes.toString().padStart(2, '0')}:${countdownSeconds.toString().padStart(2, '0')}`;
+          
+          // Change color to red when 1 minute left
+          if (countdownMinutes === 1 && countdownSeconds <= 30) {
+            countdownElement.style.color = '#ff6b6b';
+          } else {
+            countdownElement.style.color = '#f4c430';
+          }
+        }
+      }, 1000);
+      
+      // Remove Iqomah notification after 10 minutes
+      setTimeout(() => {
+        if (notification.parentNode) {
+          clearInterval(countdownInterval);
+          notification.style.animation = 'adhanAppear 0.5s ease-in reverse';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              document.body.removeChild(notification);
+            }
+          }, 500);
+        }
+      }, 600000); // 10 minutes = 600000 ms
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSettings();
+      
+      // Load officer data after a short delay to ensure DOM is ready
+      setTimeout(function() {
+        if (currentSettings) {
+          loadOfficerData();
+        }
+      }, 200);
+      
+      // Set ayat pertama
+      document.getElementById('ayatArab').textContent = ayatCollection[0].arab;
+      document.getElementById('ayatTerjemahan').textContent = ayatCollection[0].terjemahan;
+      
+      // Start intervals
+      updateClock();
+      updateCountdown();
+      setInterval(updateClock, 100);
+      setInterval(updateDates, 60000);
+      setInterval(updateCountdown, 1000);
+      setInterval(rotateAyat, 15000);
+    });
+    
+    // Function to add new container
+    function addNewContainer() {
+      const containerId = 'custom_' + Date.now();
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'dynamic-container';
+      containerDiv.id = containerId + 'Container';
+      containerDiv.setAttribute('data-container-id', containerId);
+      
+      containerDiv.innerHTML = `
+        <div class="container-header">
+          <div class="container-title">Kontainer Baru</div>
+          <div class="container-actions">
+            <button class="container-btn" onclick="moveContainer(this, 'up')" title="Pindahkan ke atas">↑</button>
+            <button class="container-btn" onclick="moveContainer(this, 'down')" title="Pindahkan ke bawah">↓</button>
+            <button class="container-btn" onclick="removeContainer(this)" title="Hapus kontainer">✕</button>
+          </div>
+        </div>
+        <div class="container-content">
+          <p>Ini adalah kontainer kosong. Edit konten di sini.</p>
+          <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8em;" onclick="editContainerContent(this)">Edit Konten</button>
+        </div>
+      `;
+      
+      document.getElementById('dynamicContainers').appendChild(containerDiv);
+    }
+    
+    // Function to move container up or down
+    function moveContainer(button, direction) {
+      const container = button.closest('.dynamic-container');
+      const containerList = document.getElementById('dynamicContainers');
+      const containers = Array.from(containerList.children);
+      const currentIndex = containers.indexOf(container);
+      
+      if (direction === 'up' && currentIndex > 0) {
+        containerList.insertBefore(container, containers[currentIndex - 1]);
+      } else if (direction === 'down' && currentIndex < containers.length - 1) {
+        containerList.insertBefore(container, containers[currentIndex + 2]);
+      }
+    }
+    
+    // Function to remove container
+    function removeContainer(button) {
+      if (confirm('Apakah Anda yakin ingin menghapus kontainer ini?')) {
+        const container = button.closest('.dynamic-container');
+        container.remove();
+      }
+    }
+    
+    // Function to edit container content
+    function editContainerContent(button) {
+      const contentDiv = button.parentElement;
+      const currentText = contentDiv.querySelector('p');
+      const newText = prompt('Edit konten:', currentText ? currentText.textContent : '');
+      
+      if (newText !== null) {
+        if (currentText) {
+          currentText.textContent = newText;
+        } else {
+          contentDiv.innerHTML = `<p>${newText}</p><button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8em;" onclick="editContainerContent(this)">Edit Konten</button>`;
+        }
+      }
+    }
+    
+    // Function to rearrange containers based on order
+    function rearrangeContainers(order) {
+      if (!order) return;
+      
+      const containerList = document.getElementById('dynamicContainers');
+      const orderArray = order.split(',');
+      const containers = Array.from(containerList.children);
+      
+      // Create a mapping of container IDs to their elements
+      const containerMap = {};
+      containers.forEach(container => {
+        const id = container.getAttribute('data-container-id');
+        containerMap[id] = container;
+      });
+      
+      // Reorder containers based on the specified order
+      orderArray.forEach(containerId => {
+        if (containerMap[containerId]) {
+          containerList.appendChild(containerMap[containerId]);
+        }
+      });
+    }
+    
+
+    
+
+    
+    // Start media animation
+    animateMediaSlides();
+  
+    // Add event listeners for editable finance fields to save changes
+    document.addEventListener('DOMContentLoaded', function() {
+      const financeFields = ['financeKas', 'financePemasukan', 'financePengeluaran', 'financeTarget'];
+        
+      financeFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+          // Save on blur (when user clicks away)
+          element.addEventListener('blur', function() {
+            saveFinanceData();
+          });
+            
+          // Save on Enter key press
+          element.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              this.blur(); // Trigger the blur event to save
+            }
+          });
+        }
+      });
+  
+      // Add functionality to make officer table cells editable
+      const officerCells = document.querySelectorAll('#petugasSection .petugas-table td:not(:nth-child(1))'); // Exclude the number column (first column)
+      officerCells.forEach(cell => {
+        cell.setAttribute('contenteditable', 'true');
+        cell.addEventListener('blur', function() {
+          saveOfficerData();
+          // Show brief visual feedback
+          const originalBg = this.style.backgroundColor;
+          this.style.backgroundColor = '#d4edda';
+          setTimeout(() => {
+            this.style.backgroundColor = originalBg;
+          }, 500);
+        });
+        cell.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.blur(); // Trigger the blur event to save
+          }
+        });
+      });
+    });
+  
+    // Function to save finance data to localStorage
+    function saveFinanceData() {
+      if (!currentSettings) currentSettings = {};
+        
+      currentSettings.saldo_kas = document.getElementById('financeKas').textContent;
+      currentSettings.pemasukan_bulan_ini = document.getElementById('financePemasukan').textContent;
+      currentSettings.pengeluaran_bulan_ini = document.getElementById('financePengeluaran').textContent;
+      currentSettings.target_pembangunan = document.getElementById('financeTarget').textContent;
+        
+      localStorage.setItem('masjidSettings', JSON.stringify(currentSettings));
+    }
+  
+    // Function to save officer data to localStorage
+    function saveOfficerData() {
+      if (!currentSettings) currentSettings = {};
+          
+      // Get all officer data from the table
+      const officerRows = [];
+      const rows = document.querySelectorAll('#petugasSection .petugas-table tbody tr');
+          
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) { // Ensure row has enough cells (now 5 with the new day column)
+          const rowData = {
+            number: cells[0].textContent.trim(),
+            hari: cells[1].textContent.trim(),  // New day column
+            imam: cells[2].textContent.trim(),
+            khotib: cells[3].textContent.trim(),
+            muadzin: cells[4].textContent.trim()
+          };
+          officerRows.push(rowData);
+        }
+      });
+          
+      currentSettings.officer_data = officerRows;
+      localStorage.setItem('masjidSettings', JSON.stringify(currentSettings));
+      
+      // Optional: Show visual feedback that data is saved
+      console.log('Petugas data saved:', officerRows);
+    }
+  
+    // Function to load officer data from settings
+    function loadOfficerData() {
+      console.log('Loading officer data...');
+      console.log('Current settings:', currentSettings);
+      
+      if (currentSettings && currentSettings.officer_data) {
+        console.log('Found officer data:', currentSettings.officer_data);
+        const rows = document.querySelectorAll('#petugasSection .petugas-table tbody tr');
+        console.log('Table rows found:', rows.length);
+            
+        currentSettings.officer_data.forEach((rowData, index) => {
+          if (rows[index]) {
+            const cells = rows[index].querySelectorAll('td');
+            console.log(`Loading row ${index}:`, rowData);
+            if (cells[1]) {
+              cells[1].textContent = rowData.hari;  // Day column
+              console.log(`Set hari: ${rowData.hari}`);
+            }
+            if (cells[2]) {
+              cells[2].textContent = rowData.imam;
+              console.log(`Set imam: ${rowData.imam}`);
+            }
+            if (cells[3]) {
+              cells[3].textContent = rowData.khotib;
+              console.log(`Set khotib: ${rowData.khotib}`);
+            }
+            if (cells[4]) {
+              cells[4].textContent = rowData.muadzin;
+              console.log(`Set muadzin: ${rowData.muadzin}`);
+            }
+          }
+        });
+        console.log('Officer data loading completed');
+      } else {
+        console.log('No officer data found in settings');
+      }
+    }
+  
+    // Test function for debugging
+    function testSaveLoad() {
+      console.log('=== Testing Save/Load ===');
+      console.log('Current localStorage:', localStorage.getItem('masjidSettings'));
+      saveOfficerData();
+      console.log('After save - localStorage:', localStorage.getItem('masjidSettings'));
+      loadOfficerData();
+      console.log('=== Test completed ===');
+    }
+  
+    // Load officer data when settings are loaded
+    if (typeof loadSettings === 'function') {
+      // Override the original loadSettings to also load officer data
+      const originalLoadSettings = window.loadSettings;
+      window.loadSettings = function() {
+        if (originalLoadSettings) originalLoadSettings();
+        // Add small delay to ensure DOM is fully loaded
+        setTimeout(loadOfficerData, 100);
+      };
+    }
+    
+    // Also load officer data on DOMContentLoaded
+    // (This is now handled in the main DOMContentLoaded event above)
+  
+    // Function to save edited content
+    function saveEditedContent() {
+      // Update currentSettings with current display values
+      if (currentSettings) {
+        currentSettings.saldo_kas = document.getElementById('financeKas').textContent.trim() || 'Rp 0';
+        currentSettings.pemasukan_bulan_ini = document.getElementById('financePemasukan').textContent.trim() || 'Rp 0';
+        currentSettings.pengeluaran_bulan_ini = document.getElementById('financePengeluaran').textContent.trim() || 'Rp 0';
+        currentSettings.target_pembangunan = document.getElementById('financeTarget').textContent.trim() || 'Rp 0';
+        currentSettings.pengumuman_judul = document.getElementById('pengumumanJudulDisplay').textContent.trim() || 'PENGUMUMAN';
+        currentSettings.pengumuman_isi = document.getElementById('pengumumanIsiDisplay').textContent.trim() || 'Belum ada pengumuman.';
+        
+        // Save to localStorage
+        localStorage.setItem('masjidSettings', JSON.stringify(currentSettings));
+      }
+    }
+      
+    // Variables for drag and resize functionality
+    let isDragging = false;
+    let isResizing = false;
+    let startX, startY;
+    let startLeft, startTop;
+    let startWidth, startHeight;
+    let offsetX, offsetY;
+    let resizeHandle = null;
+    let currentElement = null;
+    let inactivityTimer = null;
+    let areHandlesVisible = true;
+    const INACTIVITY_TIMEOUT = 3000; // 3 seconds
+    const RAMADHAN_STORAGE_KEY_PREFIX = 'ramadhanImageState';
+        
+    // Function to show resize handles
+    function showResizeHandles() {
+      if (!areHandlesVisible) {
+        const handles = document.querySelectorAll('.resize-handle');
+        handles.forEach(handle => {
+          handle.classList.remove('hidden');
+        });
+        areHandlesVisible = true;
+      }
+      
+      // Reset the inactivity timer
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      
+      // Set new timer to hide handles after inactivity
+      inactivityTimer = setTimeout(hideResizeHandles, INACTIVITY_TIMEOUT);
+    }
+    
+    // Function to hide resize handles
+    function hideResizeHandles() {
+      if (areHandlesVisible && !isDragging && !isResizing) {
+        const handles = document.querySelectorAll('.resize-handle');
+        handles.forEach(handle => {
+          handle.classList.add('hidden');
+        });
+        areHandlesVisible = false;
+      }
+    }
+    
+    // Function to save image state
+    function saveImageState(element = null) {
+      let imageElement = element || currentElement;
+      if (!imageElement) {
+        // If no specific element provided, save all elements
+        const allWrappers = document.querySelectorAll('.ramadhan-image-wrapper');
+        allWrappers.forEach(wrapper => {
+          saveSingleImageState(wrapper);
+        });
+        return;
+      }
+      
+      // If element is an image, get its wrapper
+      let imageWrapper, image;
+      if (imageElement.tagName.toLowerCase() === 'img') {
+        image = imageElement;
+        imageWrapper = imageElement.parentElement;
+      } else if (imageElement.classList.contains('ramadhan-image-wrapper')) {
+        imageWrapper = imageElement;
+        image = imageWrapper.querySelector('img');
+      } else {
+        // If it's a resize handle, find the parent wrapper
+        imageWrapper = imageElement.closest('.ramadhan-image-wrapper');
+        image = imageWrapper.querySelector('img');
+      }
+      
+      if (!imageWrapper || !image) return;
+      
+      const wrapperStyle = window.getComputedStyle(imageWrapper);
+      const imageStyle = window.getComputedStyle(image);
+      
+      // Get element identifier
+      const elementId = image.id.replace('ramadhanImage', '') || '1';
+      
+      // Store only the width, height will be calculated based on aspect ratio
+      const state = {
+        top: parseInt(wrapperStyle.top) || 10,
+        left: parseInt(wrapperStyle.left) || 0,
+        width: parseInt(imageStyle.width) || 300
+      };
+          
+      localStorage.setItem(`${RAMADHAN_STORAGE_KEY_PREFIX}_${elementId}`, JSON.stringify(state));
+    }
+    
+    // Helper function to save a single image state
+    function saveSingleImageState(imageWrapper) {
+      const image = imageWrapper.querySelector('img');
+      if (!imageWrapper || !image) return;
+      
+      const wrapperStyle = window.getComputedStyle(imageWrapper);
+      const imageStyle = window.getComputedStyle(image);
+      
+      // Get element identifier
+      const elementId = image.id.replace('ramadhanImage', '') || '1';
+      
+      // Store only the width, height will be calculated based on aspect ratio
+      const state = {
+        top: parseInt(wrapperStyle.top) || 10,
+        left: parseInt(wrapperStyle.left) || 0,
+        width: parseInt(imageStyle.width) || 300
+      };
+          
+      localStorage.setItem(`${RAMADHAN_STORAGE_KEY_PREFIX}_${elementId}`, JSON.stringify(state));
+    }
+        
+    // Function to load image state
+    function loadImageState() {
+      // Load all possible image states
+      for (let i = 1; i <= 4; i++) {
+        const savedState = localStorage.getItem(`${RAMADHAN_STORAGE_KEY_PREFIX}_${i}`);
+        if (savedState) {
+          const state = JSON.parse(savedState);
+              
+          // Apply the saved position and dimensions
+          const imageWrapper = document.getElementById(`ramadhanImageWrapper${i}`);
+          const image = document.getElementById(`ramadhanImage${i}`);
+          
+          if (imageWrapper) {
+            if (state.top !== undefined) {
+              imageWrapper.style.top = `${state.top}px`;
+            }
+            if (state.left !== undefined) {
+              imageWrapper.style.left = `${state.left}px`;
+            }
+          }
+          
+          if (image && state.width !== undefined) {
+            // Set width first
+            image.style.width = `${state.width}px`;
+            
+            // Calculate and set height based on aspect ratio
+            const img = new Image();
+            img.onload = function() {
+              const aspectRatio = img.naturalHeight / img.naturalWidth;
+              image.style.height = `${state.width * aspectRatio}px`;
+            };
+            img.src = image.src;
+          }
+        }
+      }
+    }
+        
+    // Function to make the images draggable and resizable
+    function initDraggableImage() {
+      // Initialize all image wrappers
+      const imageWrappers = document.querySelectorAll('.ramadhan-image-wrapper');
+      
+      imageWrappers.forEach(wrapper => {
+        const image = wrapper.querySelector('img');
+        const resizeHandles = wrapper.querySelectorAll('.resize-handle');
+        
+        image.style.cursor = 'move';
+        
+        // Event listeners for dragging
+        image.addEventListener('mousedown', (e) => {
+          // Show handles when interacting with image
+          showResizeHandles();
+          // Set current element for save/load purposes
+          currentElement = image;
+          startDrag(e, wrapper, image);
+        });
+        
+        // Event listeners for resizing
+        resizeHandles.forEach(handle => {
+          handle.addEventListener('mousedown', (e) => {
+            e.stopPropagation(); // Prevent triggering image drag
+            isResizing = true;
+            resizeHandle = e.target;
+            currentElement = handle;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // Get current dimensions
+            const computedStyle = window.getComputedStyle(image);
+            startWidth = parseInt(computedStyle.width);
+            startHeight = parseInt(computedStyle.height);
+            
+            e.preventDefault();
+          });
+        });
+        
+        // Show handles when hovering over the image wrapper
+        wrapper.addEventListener('mouseenter', showResizeHandles);
+        wrapper.addEventListener('mousemove', showResizeHandles);
+      });
+          
+      // Global activity listeners
+      document.addEventListener('mousemove', (e) => {
+        // Show handles when mouse moves anywhere on the document
+        if (e.target.closest('.ramadhan-image-wrapper')) {
+          showResizeHandles();
+        }
+      });
+      
+      document.addEventListener('keydown', showResizeHandles);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', stopAction);
+          
+      function startDrag(e, wrapper, img) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+            
+        // Get current positions
+        const computedStyle = window.getComputedStyle(wrapper);
+        startLeft = parseInt(computedStyle.left) || 0;
+        startTop = parseInt(computedStyle.top) || 10;
+            
+        e.preventDefault();
+      }
+          
+      function handleMove(e) {
+        if (isDragging || isResizing) {
+          let imageWrapper, image;
+          
+          if (isResizing && resizeHandle) {
+            // Find the wrapper and image for the resize handle
+            imageWrapper = resizeHandle.closest('.ramadhan-image-wrapper');
+            image = imageWrapper.querySelector('img');
+          } else if (isDragging && currentElement) {
+            // Find the wrapper and image for the current element
+            if (currentElement.tagName.toLowerCase() === 'img') {
+              image = currentElement;
+              imageWrapper = currentElement.parentElement;
+            } else {
+              imageWrapper = currentElement.closest('.ramadhan-image-wrapper');
+              image = imageWrapper.querySelector('img');
+            }
+          }
+          
+          if (isDragging) {
+            // Dragging functionality
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+              
+            let newLeft = startLeft + dx;
+            let newTop = startTop + dy;
+              
+            // Limit movement to keep the image within the viewport
+            const rect = image.getBoundingClientRect();
+            const scaledWidth = rect.width; // No scaling anymore
+            const scaledHeight = rect.height;
+              
+            // Calculate boundaries considering the image size
+            const maxLeft = window.innerWidth - scaledWidth;
+            const maxTop = window.innerHeight - scaledHeight;
+              
+            // Ensure the image stays within bounds
+            newLeft = Math.max(-scaledWidth/2, Math.min(newLeft, maxLeft + scaledWidth/2));
+            newTop = Math.max(10, Math.min(newTop, maxTop));
+              
+            // Update position
+            imageWrapper.style.left = `${newLeft}px`;
+            imageWrapper.style.top = `${newTop}px`;
+          } else if (isResizing) {
+            // Resizing functionality
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+                
+            let newWidth, newHeight;
+            
+            if (resizeHandle.classList.contains('resize-handle-br')) {
+              // Bottom-right handle - resize both width and height
+              newWidth = Math.max(100, startWidth + dx);
+              newHeight = Math.max(50, startHeight + dy);
+            } else if (resizeHandle.classList.contains('resize-handle-bl')) {
+              // Bottom-left handle - resize width and move x
+              newWidth = Math.max(100, startWidth - dx);
+              newHeight = Math.max(50, startHeight + dy);
+              imageWrapper.style.left = `${parseInt(imageWrapper.style.left) || 0 + dx}px`;
+            } else if (resizeHandle.classList.contains('resize-handle-tr')) {
+              // Top-right handle - resize height and move y
+              newWidth = Math.max(100, startWidth + dx);
+              newHeight = Math.max(50, startHeight - dy);
+              imageWrapper.style.top = `${parseInt(imageWrapper.style.top) || 10 + dy}px`;
+            } else if (resizeHandle.classList.contains('resize-handle-tl')) {
+              // Top-left handle - resize both and move both
+              newWidth = Math.max(100, startWidth - dx);
+              newHeight = Math.max(50, startHeight - dy);
+              imageWrapper.style.left = `${parseInt(imageWrapper.style.left) || 0 + dx}px`;
+              imageWrapper.style.top = `${parseInt(imageWrapper.style.top) || 10 + dy}px`;
+            }
+                
+            // Update dimensions
+            image.style.width = `${newWidth}px`;
+            image.style.height = `${newHeight}px`;
+          }
+        }
+      }
+          
+      function stopAction() {
+        if (isDragging) {
+          isDragging = false;
+          // Save the final position after dragging stops
+          saveImageState(currentElement);
+          // Reset inactivity timer after dragging
+          if (inactivityTimer) {
+            clearTimeout(inactivityTimer);
+          }
+          inactivityTimer = setTimeout(hideResizeHandles, INACTIVITY_TIMEOUT);
+        } else if (isResizing) {
+          isResizing = false;
+          // Save the final state after resizing stops
+          saveImageState(resizeHandle);
+          resizeHandle = null;
+          currentElement = null;
+          // Reset inactivity timer after resizing
+          if (inactivityTimer) {
+            clearTimeout(inactivityTimer);
+          }
+          inactivityTimer = setTimeout(hideResizeHandles, INACTIVITY_TIMEOUT);
+        }
+      }
+    }
+        
+    // Background Color Template Functionality
+    function applyBackgroundColor(color) {
+      // Apply to all containers and main elements
+      const containers = [
+        '.main-layout',
+        '.content-wrapper',
+        '.header-banner',
+        '.prayer-cards-wrapper',
+        '.prayer-card',
+        '.running-text-container',
+        '.settings-section',
+        '.modal-content',
+        '.finance-container',
+        '.slide-container',
+        '.date-section',
+        '.masjid-info',
+        'body'
+      ];
+      
+      let appliedCount = 0;
+      
+      containers.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+          element.style.backgroundColor = color;
+          element.style.background = color; // For compatibility
+          appliedCount++;
+        });
+      });
+      
+      // Also apply to any container with class containing 'container'
+      const allContainers = document.querySelectorAll('[class*="container"]');
+      allContainers.forEach(element => {
+        element.style.backgroundColor = color;
+        element.style.background = color;
+        appliedCount++;
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('backgroundColorTemplate', color);
+      
+      // Show confirmation
+      alert(`Background color ${color} applied to ${appliedCount} elements`);
+    }
+    
+    // Load saved background color on page load
+    function loadSavedBackgroundColor() {
+      const savedColor = localStorage.getItem('backgroundColorTemplate');
+      if (savedColor) {
+        // Apply to all containers and main elements
+        const containers = [
+          '.main-layout',
+          '.content-wrapper',
+          '.header-banner',
+          '.prayer-cards-wrapper',
+          '.prayer-card',
+          '.running-text-container',
+          '.settings-section',
+          '.modal-content',
+          '.finance-container',
+          '.slide-container',
+          '.date-section',
+          '.masjid-info',
+          'body'
+        ];
+        
+        containers.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(element => {
+            element.style.backgroundColor = savedColor;
+            element.style.background = savedColor;
+          });
+        });
+        
+        // Also apply to any container with class containing 'container'
+        const allContainers = document.querySelectorAll('[class*="container"]');
+        allContainers.forEach(element => {
+          element.style.backgroundColor = savedColor;
+          element.style.background = savedColor;
+        });
+      }
+    }
+    
+    // Fullscreen functionality
+    let fullscreenTimer;
+    const FULLSCREEN_INACTIVITY_TIMEOUT = 3000; // 3 seconds
+    
+    function toggleFullscreen() {
+      const elem = document.documentElement;
+      
+      if (!document.fullscreenElement) {
+        // Enter fullscreen
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+          elem.msRequestFullscreen();
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+          document.msExitFullscreen();
+        }
+      }
+    }
+    
+    function showFullscreenControls() {
+      const settingsIcon = document.querySelector('.settings-icon');
+      const fullscreenIcon = document.querySelector('.fullscreen-icon');
+      
+      if (settingsIcon) settingsIcon.classList.remove('hide-controls');
+      if (fullscreenIcon) fullscreenIcon.classList.remove('hide-controls');
+      
+      // Reset the timer
+      if (fullscreenTimer) {
+        clearTimeout(fullscreenTimer);
+      }
+      
+      // Hide after inactivity timeout
+      fullscreenTimer = setTimeout(hideFullscreenControls, FULLSCREEN_INACTIVITY_TIMEOUT);
+    }
+    
+    function hideFullscreenControls() {
+      const settingsIcon = document.querySelector('.settings-icon');
+      const fullscreenIcon = document.querySelector('.fullscreen-icon');
+      
+      if (settingsIcon) settingsIcon.classList.add('hide-controls');
+      if (fullscreenIcon) fullscreenIcon.classList.add('hide-controls');
+    }
+    
+    // Activity detection
+    function setupActivityListeners() {
+      // Mouse movement
+      document.addEventListener('mousemove', showFullscreenControls);
+      
+      // Keyboard activity
+      document.addEventListener('keydown', showFullscreenControls);
+      document.addEventListener('keyup', showFullscreenControls);
+      
+      // Touch events for mobile
+      document.addEventListener('touchstart', showFullscreenControls);
+      document.addEventListener('touchmove', showFullscreenControls);
+      document.addEventListener('touchend', showFullscreenControls);
+      
+      // Click events
+      document.addEventListener('click', showFullscreenControls);
+      
+      // Scroll events
+      document.addEventListener('scroll', showFullscreenControls);
+    }
+    
+    // Initialize when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // First, load any saved state
+      loadImageState();
+      // Load saved background color
+      loadSavedBackgroundColor();
+      // Then initialize the draggable functionality
+      initDraggableImage();
+      // Start the inactivity timer
+      inactivityTimer = setTimeout(hideResizeHandles, INACTIVITY_TIMEOUT);
+      
+      // Setup fullscreen controls
+      setupActivityListeners();
+      // Show controls initially
+      showFullscreenControls();
+      
+      // Start video scheduler
+      setTimeout(() => {
+        if (currentSettings) {
+          startVideoScheduler();
+        }
+      }, 2000); // Delay to ensure settings are loaded
+    });
+  
+  </script>
+  
+  <!-- Video Player Overlay -->
+  <div id="videoOverlay" class="video-overlay">
+   <video id="videoPlayer" class="video-player" controls playsinline>
+    Your browser does not support the video tag.
+   </video>
+  </div>
+</body>
+</html>
